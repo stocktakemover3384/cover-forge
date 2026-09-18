@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>CoverForge 封面工坊 · 本地封面尺寸处理工具</title>
+<meta name="description" content="在浏览器本地把一张图裁成各平台封面尺寸，并按目标文件大小压缩。零上传、零依赖、离线可用。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230A0C0F'/%3E%3Cpath d='M9.5 13V9.5H13M19 9.5h3.5V13M22.5 19v3.5H19M13 22.5H9.5V19' stroke='%23FF7A33' stroke-width='2.2' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%23FF7A33'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#panel-ratio">跳到设置</a>
+
+<!-- ══ TOPBAR ══════════════════════════════════════════════════════════ -->
+<header class="topbar" id="topbar">
+  <div class="topbar__brand">
+    <span class="brandmark" aria-hidden="true">
+      <svg viewBox="0 0 32 32" width="26" height="26">
+        <path d="M9.5 13V9.5H13M19 9.5h3.5V13M22.5 19v3.5H19M13 22.5H9.5V19"
+              stroke="currentColor" stroke-width="2.3" fill="none" stroke-linecap="round"/>
+        <circle cx="16" cy="16" r="2.6" fill="currentColor"/>
+      </svg>
+    </span>
+    <h1 class="brand">
+      <span class="brand__en">CoverForge</span>
+      <span class="brand__zh">封面工坊</span>
+    </h1>
+    <p class="brand__tag">把一张图，锻成各平台的封面尺寸</p>
+  </div>
+
+  <div class="topbar__actions">
+    <p class="privacy-badge" title="所有处理都在你的浏览器本地完成，图片不会离开这台设备">
+      <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
+        <path d="M8 1.6 3.2 3.4v3.9c0 3 2 5.6 4.8 6.6 2.8-1 4.8-3.6 4.8-6.6V3.4L8 1.6Z"
+              fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+      </svg>
+      <span>本地处理 · 不联网</span>
+    </p>
+    <button type="button" class="btn btn--ghost" id="btn-reset-all" disabled>重置</button>
+  </div>
+</header>
+
+<!-- ══ DRAG VEIL ═══════════════════════════════════════════════════════ -->
+<div class="veil" id="drop-veil" aria-hidden="true">
+  <div class="veil__inner">
+    <svg class="veil__icon" viewBox="0 0 48 48" width="52" height="52" aria-hidden="true">
+      <path d="M10 20V10h10M28 10h10v10M38 28v10H28M20 38H10V28"
+            stroke="currentColor" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <path d="M24 16v16M16 24h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" opacity=".55"/>
+    </svg>
+    <p class="veil__title">松开即可载入</p>
+    <p class="veil__sub">支持 JPG · PNG · WebP · GIF · BMP</p>
+  </div>
+</div>
+
+<!-- ══ WORKSPACE ═══════════════════════════════════════════════════════ -->
+<div class="workspace">
+
+  <!-- ── LEFT RAIL ─────────────────────────────────────────────────── -->
+  <aside class="rail" aria-label="素材与流程">
+
+    <nav class="steps" aria-label="处理流程">
+      <ol class="steps__list" id="steps-list">
+        <li class="steps__item is-current" data-step="source"><span class="steps__no">01</span><span class="steps__label">素材</span></li>
+        <li class="steps__item" data-step="ratio"><span class="steps__no">02</span><span class="steps__label">比例</span></li>
+        <li class="steps__item" data-step="target"><span class="steps__no">03</span><span class="steps__label">体积</span></li>
+        <li class="steps__item" data-step="output"><span class="steps__no">04</span><span class="steps__label">尺寸</span></li>
+        <li class="steps__item" data-step="crop"><span class="steps__no">05</span><span class="steps__label">取景</span></li>
+        <li class="steps__item" data-step="export"><span class="steps__no">06</span><span class="steps__label">导出</span></li>
+      </ol>
+    </nav>
+
+    <!-- 01 素材 -->
+    <section class="panel" id="panel-source" aria-labelledby="h-source">
+      <header class="panel__head">
+        <h2 class="panel__eyebrow" id="h-source">01 · 素材</h2>
+      </header>
+      <div class="panel__body">
+        <div class="dropzone" id="dropzone" tabindex="0" role="button"
+             aria-label="选择或投放一张图片，也可以粘贴剪贴板图片">
+          <svg class="dropzone__icon" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
+            <path d="M8 21.5V9.5A1.5 1.5 0 0 1 9.5 8h13A1.5 1.5 0 0 1 24 9.5v12a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 8 21.5Z"
+                  fill="none" stroke="currentColor" stroke-width="1.6"/>
+            <path d="m8.8 20.2 4.6-4.3 3.3 3.1 3.1-2.6 3.4 3.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            <circle cx="13" cy="12.6" r="1.5" fill="currentColor"/>
+          </svg>
+          <p class="dropzone__title">拖入图片</p>
+          <p class="dropzone__sub">点击选择 · 拖拽到页面任意位置 · <kbd>⌘</kbd><kbd>V</kbd> 粘贴</p>
+          <input type="file" id="file-input" class="visually-hidden" accept="image/*">
+        </div>
+
+        <dl class="kv" id="source-info" hidden>
+          <div class="kv__row kv__row--stack">
+            <dt>文件名</dt>
+            <dd class="kv__file" id="info-name" title="">—</dd>
+          </div>
+          <div class="kv__row"><dt>尺寸</dt><dd class="mono" id="info-dims">—</dd></div>
+          <div class="kv__row"><dt>像素量</dt><dd class="mono" id="info-mp">—</dd></div>
+          <div class="kv__row"><dt>比例</dt><dd class="mono" id="info-ratio">—</dd></div>
+          <div class="kv__row"><dt>文件大小</dt><dd class="mono" id="info-size">—</dd></div>
+          <div class="kv__row"><dt>格式</dt><dd class="mono" id="info-format">—</dd></div>
+          <div class="kv__row"><dt>透明通道</dt><dd class="mono" id="info-alpha">—</dd></div>
+        </dl>
+
+        <p class="flag flag--amber" id="flag-large" hidden>
+          大尺寸图片 · 处理可能需要数秒
+        </p>
+        <button type="button" class="btn btn--secondary btn--block" id="btn-change-file" hidden>换一张图片</button>
+      </div>
+    </section>
+  </aside>
+
+  <!-- ── CENTER STAGE ──────────────────────────────────────────────── -->
+  <main class="stage-col" aria-label="裁剪与预览">
+    <section class="panel panel--stage" id="panel-stage" aria-labelledby="h-stage">
+      <header class="panel__head panel__head--row">
+        <h2 class="panel__eyebrow" id="h-stage">成片预览</h2>
+        <div class="panel__head-tools">
+          <div class="segmented segmented--sm" id="view-mode" role="group" aria-label="预览视图">
+            <button type="button" class="segmented__btn is-active" data-view="crop" aria-pressed="true">成片</button>
+            <button type="button" class="segmented__btn" data-view="source" aria-pressed="false">原图取景</button>
+          </div>
+          <button type="button" class="btn btn--ghost btn--sm" id="btn-toggle-grid" aria-pressed="true">三分线</button>
+          <button type="button" class="btn btn--ghost btn--sm" id="btn-reset-crop" disabled>重置居中</button>
+        </div>
+      </header>
+
+      <div class="panel__body panel__body--stage">
+
+        <!-- 空态 -->
+        <div class="stage-empty" id="stage-empty" role="button" tabindex="0"
+             aria-label="选择一张图片，也可以把图片拖到页面任意位置或粘贴剪贴板图片">
+          <div class="stage-empty__ring" aria-hidden="true">
+            <svg viewBox="0 0 64 64" width="64" height="64">
+              <path d="M12 26V12h14M38 12h14v14M52 38v14H38M26 52H12V38"
+                    stroke="currentColor" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+              <path d="M32 24v16M24 32h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".45"/>
+            </svg>
+          </div>
+          <p class="stage-empty__title">还没有素材</p>
+          <p class="stage-empty__sub">
+            点这里选择一张图片，也可以把图片拖到页面任意位置，或按 <kbd>⌘</kbd><kbd>V</kbd> 粘贴。
+          </p>
+        </div>
+
+        <!-- 舞台 -->
+        <div class="stage" id="stage" hidden>
+          <div class="stage__frame" id="stage-frame">
+            <canvas id="stage-canvas" width="16" height="9" aria-label="成片预览画布" role="img"></canvas>
+            <div class="stage__thirds" id="stage-thirds" aria-hidden="true">
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <div class="stage__crop" id="stage-crop" hidden aria-hidden="true">
+              <i class="crop-tick crop-tick--tl"></i><i class="crop-tick crop-tick--tr"></i>
+              <i class="crop-tick crop-tick--bl"></i><i class="crop-tick crop-tick--br"></i>
+              <span class="stage__crop-tag mono" id="crop-tag">—</span>
+            </div>
+            <div class="stage__brackets" aria-hidden="true">
+              <i class="br br--tl"></i><i class="br br--tr"></i><i class="br br--bl"></i><i class="br br--br"></i>
+            </div>
+            <div class="stage__busy" id="stage-busy" hidden>
+              <div class="scanner" aria-hidden="true"><i></i></div>
+              <p class="stage__busy-text" id="busy-text">正在处理…</p>
+            </div>
+          </div>
+          <p class="stage__hint" id="stage-hint">
+            <span class="stage__hint-grip" aria-hidden="true">⋮⋮</span>
+            <span id="stage-hint-text">在框内拖动可调整取景焦点</span>
+          </p>
+        </div>
+
+        <!-- 读数条 -->
+        <div class="readout" id="readout">
+          <div class="readout__item readout__item--wide">
+            <span class="readout__label">输出尺寸</span>
+            <span class="readout__value mono" id="ro-dims">—</span>
+          </div>
+          <div class="readout__separator" aria-hidden="true"></div>
+          <div class="readout__item">
+            <span class="readout__label">比例</span>
+            <span class="readout__value mono" id="ro-ratio">—</span>
+          </div>
+          <div class="readout__separator" aria-hidden="true"></div>
+          <div class="readout__item">
+            <span class="readout__label">预估体积</span>
+            <span class="readout__value mono" id="ro-size">—</span>
+          </div>
+          <div class="readout__separator" aria-hidden="true"></div>
+          <div class="readout__item">
+            <span class="readout__label">目标</span>
+            <span class="readout__value readout__value--sm" id="ro-target">不限</span>
+          </div>
+          <div class="readout__item readout__item--status">
+            <span class="status-pill" id="ro-status" data-state="idle">待载入</span>
+          </div>
+          <div class="readout__progress" id="readout-progress" hidden><i></i></div>
+        </div>
+
+        <!-- 取景：九宫格焦点（键盘可达的替代操作） -->
+        <div class="focus-block" id="panel-crop-controls" hidden>
+          <div class="focus-block__head">
+            <h3 class="mini-label">取景焦点</h3>
+            <p class="focus-block__readout mono" id="focus-readout">居中 · 50% / 50%</p>
+          </div>
+          <div class="focus-grid" id="focus-grid" role="group" aria-label="取景焦点九宫格">
+            <button type="button" class="focus-grid__cell" data-fx="0"   data-fy="0"   aria-label="左上"></button>
+            <button type="button" class="focus-grid__cell" data-fx="0.5" data-fy="0"   aria-label="上中"></button>
+            <button type="button" class="focus-grid__cell" data-fx="1"   data-fy="0"   aria-label="右上"></button>
+            <button type="button" class="focus-grid__cell" data-fx="0"   data-fy="0.5" aria-label="左中"></button>
+            <button type="button" class="focus-grid__cell" data-fx="0.5" data-fy="0.5" aria-label="正中"></button>
+            <button type="button" class="focus-grid__cell" data-fx="1"   data-fy="0.5" aria-label="右中"></button>
+            <button type="button" class="focus-grid__cell" data-fx="0"   data-fy="1"   aria-label="左下"></button>
+            <button type="button" class="focus-grid__cell" data-fx="0.5" data-fy="1"   aria-label="下中"></button>
+            <button type="button" class="focus-grid__cell" data-fx="1"   data-fy="1"   aria-label="右下"></button>
+          </div>
+        </div>
+
+        <div class="stage-actions">
+          <button type="button" class="btn btn--primary btn--block" id="btn-download" disabled>
+            <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+              <path d="M8 2v8m0 0 3-3m-3 3L5 7M3 13h10" fill="none" stroke="currentColor"
+                    stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span id="download-label">下载封面</span>
+          </button>
+          <p class="stage-actions__note" id="download-note">先载入一张图片</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ── RIGHT INSPECTOR ───────────────────────────────────────────── -->
+  <aside class="inspector" aria-label="输出设置">
+
+    <!-- 02 比例 -->
+    <section class="panel" id="panel-ratio" aria-labelledby="h-ratio">
+      <header class="panel__head">
+        <h2 class="panel__eyebrow" id="h-ratio">02 · 画面比例</h2>
+      </header>
+      <div class="panel__body">
+        <h3 class="mini-label">通用比例</h3>
+        <div class="chips" id="generic-ratios" role="group" aria-label="通用画面比例"></div>
+
+        <h3 class="mini-label mini-label--spaced">平台预设</h3>
+        <div class="presets" id="platform-presets"></div>
+
+        <h3 class="mini-label mini-label--spaced">自定义比例</h3>
+        <div class="ratio-custom">
+          <div class="field field--inline">
+            <input type="number" id="ratio-w" class="input input--num" min="0.1" max="100" step="0.01"
+                   value="2.35" aria-label="自定义比例宽度">
+            <span class="ratio-custom__colon" aria-hidden="true">:</span>
+            <input type="number" id="ratio-h" class="input input--num" min="0.1" max="100" step="0.01"
+                   value="1" aria-label="自定义比例高度">
+            <button type="button" class="btn btn--secondary btn--sm" id="btn-apply-ratio">套用</button>
+          </div>
+          <p class="field__msg" id="ratio-error" role="alert" hidden></p>
+          <p class="field__hint">支持小数，例如 <span class="mono">2.35 : 1</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 目标体积 -->
+    <section class="panel" id="panel-target" aria-labelledby="h-target">
+      <header class="panel__head">
+        <h2 class="panel__eyebrow" id="h-target">03 · 目标文件大小</h2>
+      </header>
+      <div class="panel__body">
+        <div class="chips" id="size-presets" role="group" aria-label="目标文件大小预设"></div>
+
+        <div class="field field--spaced">
+          <label class="mini-label" for="size-value">自定义目标</label>
+          <div class="field__row">
+            <input type="number" id="size-value" class="input input--num" min="1" step="1"
+                   placeholder="500" inputmode="decimal" aria-label="自定义目标数值">
+            <div class="segmented segmented--sm" id="size-unit" role="group" aria-label="目标大小单位">
+              <button type="button" class="segmented__btn is-active" data-unit="KB" aria-pressed="true">KB</button>
+              <button type="button" class="segmented__btn" data-unit="MB" aria-pressed="false">MB</button>
+            </div>
+            <button type="button" class="btn btn--secondary btn--sm" id="btn-apply-size">套用</button>
+          </div>
+          <p class="field__msg" id="size-error" role="alert" hidden></p>
+          <p class="field__hint">上限 50 MB。留空 = 不限大小，使用最高画质。</p>
+        </div>
+
+        <p class="flag flag--amber" id="flag-tiny" hidden>目标偏小，画质损失可能较明显。</p>
+        <p class="flag flag--azure" id="flag-png" hidden>
+          PNG 是无损格式，无法用质量参数控制体积。
+          <button type="button" class="btn btn--secondary btn--sm flag__action" id="btn-switch-jpg">改为 JPG 以达到目标大小</button>
+        </p>
+      </div>
+    </section>
+
+    <!-- 04 输出尺寸 -->
+    <section class="panel" id="panel-output" aria-labelledby="h-output">
+      <header class="panel__head">
+        <h2 class="panel__eyebrow" id="h-output">04 · 输出尺寸</h2>
+      </header>
+      <div class="panel__body">
+        <div class="chips chips--stack" id="size-modes" role="group" aria-label="输出尺寸策略">
+          <button type="button" class="chip chip--wide is-active" data-mode="max" aria-pressed="true">
+            <span class="chip__main">最大可用</span>
+            <span class="chip__meta mono">按原图可用像素</span>
+          </button>
+          <button type="button" class="chip chip--wide" data-mode="preset" aria-pressed="false" id="mode-preset" disabled>
+            <span class="chip__main">平台推荐</span>
+            <span class="chip__meta mono" id="mode-preset-px">—</span>
+          </button>
+          <button type="button" class="chip chip--wide" data-mode="edge" aria-pressed="false">
+            <span class="chip__main">自定义长边</span>
+            <span class="chip__meta mono">按长边等比</span>
+          </button>
+        </div>
+
+        <div class="field field--spaced" id="edge-field" hidden>
+          <label class="mini-label" for="edge-input">长边像素</label>
+          <div class="field__row">
+            <div class="chips chips--tight" id="edge-presets" role="group" aria-label="长边像素快捷值">
+              <button type="button" class="chip chip--xs" data-edge="1920">1920</button>
+              <button type="button" class="chip chip--xs" data-edge="1280">1280</button>
+              <button type="button" class="chip chip--xs" data-edge="1080">1080</button>
+              <button type="button" class="chip chip--xs" data-edge="800">800</button>
+            </div>
+            <input type="number" id="edge-input" class="input input--num" min="16" max="10000" step="1"
+                   value="1920" aria-label="自定义长边像素">
+          </div>
+          <p class="field__msg" id="edge-error" role="alert" hidden></p>
+        </div>
+
+        <p class="flag flag--amber" id="flag-upscale" hidden></p>
+        <p class="flag flag--neutral" id="flag-downscale" hidden></p>
+      </div>
+    </section>
+
+    <!-- 05 取景（指向舞台控件） -->
+    <section class="panel panel--link" id="panel-crop" aria-labelledby="h-crop">
+      <header class="panel__head">
+        <h2 class="panel__eyebrow" id="h-crop">05 · 取景</h2>
+      </header>
+      <div class="panel__body">
+        <p class="panel__lead">
+          自动居中裁剪，永远填满目标比例、不留黑边。需要保留边缘内容时，在舞台里直接调整取景——
+          「成片」视图拖动图片、「原图取景」视图拖动裁剪框，两者等价；也可以用九宫格焦点按钮微调。
+        </p>
+        <dl class="kv kv--compact" id="crop-info" hidden>
+          <div class="kv__row"><dt>裁切区域</dt><dd class="mono" id="crop-rect">—</dd></div>
+          <div class="kv__row"><dt>横向余量</dt><dd class="mono" id="crop-gap-x">—</dd></div>
+          <div class="kv__row"><dt>纵向余量</dt><dd class="mono" id="crop-gap-y">—</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- 06 导出 -->
+    <section class="panel" id="panel-export" aria-labelledby="h-export">
+      <header class="panel__head">
+        <h2 class="panel__eyebrow" id="h-export">06 · 导出</h2>
+      </header>
+      <div class="panel__body">
+
+        <div class="field">
+          <span class="mini-label" id="lbl-format">格式</span>
+          <div class="segmented" id="format-group" role="group" aria-labelledby="lbl-format">
+            <button type="button" class="segmented__btn" data-format="image/jpeg" aria-pressed="false">JPG</button>
+            <button type="button" class="segmented__btn" data-format="image/png" aria-pressed="false">PNG</button>
+          </div>
+          <p class="field__hint" id="format-hint">JPG 体积小、适合照片；PNG 无损、适合文字与图形。</p>
+        </div>
+
+        <div class="field field--spaced" id="bg-field" hidden>
+          <label class="mini-label" for="bg-color">填充背景色</label>
+          <div class="field__row">
+            <input type="color" id="bg-color" class="input input--color" value="#ffffff" aria-label="JPG 填充背景色">
+            <div class="swatches" id="bg-swatches" role="group" aria-label="背景色快捷色板">
+              <button type="button" class="swatch" data-color="#ffffff" style="--sw:#ffffff" aria-label="白色"></button>
+              <button type="button" class="swatch" data-color="#0A0C0F" style="--sw:#0A0C0F" aria-label="近黑"></button>
+              <button type="button" class="swatch" data-color="#F2F1EC" style="--sw:#F2F1EC" aria-label="米白"></button>
+              <button type="button" class="swatch" data-color="#FF7A33" style="--sw:#FF7A33" aria-label="品牌橙"></button>
+            </div>
+          </div>
+          <p class="field__hint">原图含透明通道，转 JPG 时透明区域会填充此颜色。</p>
+        </div>
+
+        <div class="field field--spaced" id="quality-field">
+          <div class="field__head">
+            <label class="mini-label" for="quality-input">手动覆盖 JPG 质量</label>
+            <span class="mono field__value" id="quality-readout">自动</span>
+          </div>
+          <input type="range" id="quality-input" class="range" min="0" max="100" step="1" value="0"
+                 aria-describedby="quality-hint">
+          <p class="field__hint" id="quality-hint">拖到最左 = 由目标文件大小自动决定质量。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 导出前信息 -->
+    <section class="panel panel--summary" id="panel-summary" aria-labelledby="h-summary">
+      <header class="panel__head">
+        <h2 class="panel__eyebrow" id="h-summary">导出前信息</h2>
+      </header>
+      <div class="panel__body">
+        <p class="panel__lead">
+          下列数值全部取自同一份即将下载的文件 —— <strong>「预估文件大小」不是估算，而是它的真实字节数</strong>。
+        </p>
+        <dl class="summary" id="summary-list">
+          <div class="summary__row"><dt>输出尺寸</dt><dd class="mono" id="sm-dims">—</dd></div>
+          <div class="summary__row"><dt>画面比例</dt><dd class="mono" id="sm-ratio">—</dd></div>
+          <div class="summary__row"><dt>格式</dt><dd class="mono" id="sm-format">—</dd></div>
+          <div class="summary__row"><dt>目标体积</dt><dd class="mono" id="sm-target">不限</dd></div>
+          <div class="summary__row"><dt>预估文件大小</dt><dd class="mono" id="sm-actual">—</dd></div>
+          <div class="summary__row"><dt>编码质量</dt><dd class="mono" id="sm-quality">—</dd></div>
+          <div class="summary__row"><dt>分辨率变化</dt><dd class="mono" id="sm-scale">—</dd></div>
+          <div class="summary__row"><dt>处理耗时</dt><dd class="mono" id="sm-time">—</dd></div>
+          <div class="summary__row summary__row--verdict"><dt>目标达成</dt><dd id="sm-verdict">—</dd></div>
+        </dl>
+        <p class="summary__foot" id="sm-foot">—</p>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<!-- ══ TOASTS ══════════════════════════════════════════════════════════ -->
+<div class="toasts" id="toasts" role="status" aria-live="polite" aria-atomic="false"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

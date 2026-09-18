@@ -1,0 +1,847 @@
+/* ============================================================================
+   CoverForge · 封面工坊 — styles.css
+   设计系统见 DESIGN.md。全部颜色 / 尺寸 / 动效均引用 :root 令牌，无魔法值。
+   ========================================================================= */
+
+/* ── 1. Tokens ─────────────────────────────────────────────────────────── */
+:root {
+  /* Surfaces */
+  --obsidian:    #0A0C0F;
+  --graphite:    #12151A;
+  --slate:       #1A1F26;
+  --slate-hi:    #222831;
+  --hairline:    #262C35;
+  --hairline-hi: #333B47;
+
+  /* Text */
+  --text-hi: #E9EDF2;
+  --text:    #9BA6B4;
+  --text-lo: #7C8794;
+
+  /* Accent */
+  --ember:    #FF7A33;
+  --ember-hi: #FF9459;
+  --ember-dp: #D9581A;
+  --ember-a12: rgba(255, 122, 51, .12);
+  --ember-a24: rgba(255, 122, 51, .24);
+  --ember-a40: rgba(255, 122, 51, .40);
+
+  /* Semantic */
+  --jade:  #35C48D;
+  --amber: #E8B24A;
+  --coral: #FF6A5E;
+  --azure: #6BA6F5;
+
+  /* Type */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+               "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas,
+               "Liberation Mono", "Courier New", monospace;
+
+  --fs-display: 30px;
+  --fs-title:   17px;
+  --fs-lead:    14.5px;
+  --fs-body:    14px;
+  --fs-small:   12.5px;
+  --fs-micro:   11px;
+  --fs-eyebrow: 10.5px;
+  --fs-readout: 22px;
+  --fs-mono:    12.5px;
+
+  /* Space (4px base) */
+  --s-1: 2px;  --s-2: 4px;  --s-3: 6px;  --s-4: 8px;
+  --s-5: 12px; --s-6: 16px; --s-7: 20px; --s-8: 24px;
+  --s-9: 32px; --s-10: 40px; --s-11: 56px; --s-12: 72px;
+
+  /* Radius */
+  --r-xs: 4px; --r-sm: 8px; --r-md: 14px; --r-full: 999px;
+
+  /* Shadow */
+  --sh-1: 0 1px 2px rgba(0, 0, 0, .5);
+  --sh-2: 0 10px 28px -10px rgba(0, 0, 0, .72);
+  --sh-inset: inset 0 1px 0 rgba(255, 255, 255, .04);
+
+  /* Motion */
+  --t-fast: 120ms;
+  --t-base: 200ms;
+  --t-slow: 340ms;
+  --ease: cubic-bezier(.22, .61, .36, 1);
+  --ease-emph: cubic-bezier(.16, .84, .30, 1);
+
+  /* Layout */
+  --rail-w: 264px;
+  --insp-w: 376px;
+}
+
+/* ── 2. Reset / base ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* 必须放在所有组件规则之前：本文件里的组件大量使用 display:flex/grid，
+   其特异性高于 UA 的 [hidden]{display:none}，会把 hidden 元素重新显示出来。
+   这条规则统一兜住，让 hidden 属性在整站都可靠。 */
+[hidden] { display: none !important; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--obsidian);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, p, dl, dd, dt, ol, ul { margin: 0; }
+ol, ul { padding: 0; list-style: none; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: .01em;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute; left: var(--s-4); top: -60px; z-index: 100;
+  padding: var(--s-3) var(--s-5);
+  background: var(--ember); color: var(--obsidian);
+  border-radius: var(--r-xs); text-decoration: none; font-weight: 620;
+  transition: top var(--t-fast) var(--ease);
+}
+.skip-link:focus { top: var(--s-4); }
+
+/* 统一焦点环 */
+:focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
+}
+:focus:not(:focus-visible) { outline: none; }
+
+::selection { background: var(--ember-a40); color: #fff; }
+
+/* ── 3. Topbar ────────────────────────────────────────────────────────── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--s-6);
+  padding: var(--s-5) var(--s-8);
+  border-bottom: 1px solid var(--hairline);
+  background: linear-gradient(180deg, var(--graphite), var(--obsidian));
+  position: sticky; top: 0; z-index: 30;
+}
+
+.topbar__brand { display: flex; align-items: center; gap: var(--s-5); min-width: 0; }
+
+.brandmark { color: var(--ember); display: flex; flex: none; }
+
+.brand { display: flex; align-items: baseline; gap: var(--s-4); font-size: var(--fs-title); font-weight: 640; }
+.brand__en {
+  color: var(--text-hi); font-size: var(--fs-title); letter-spacing: -.012em;
+  text-transform: uppercase; font-weight: 700;
+}
+.brand__zh { color: var(--text-lo); font-size: var(--fs-micro); font-weight: 560; letter-spacing: .18em; }
+
+.brand__tag {
+  color: var(--text-lo); font-size: var(--fs-small);
+  padding-left: var(--s-5); margin-left: var(--s-2);
+  border-left: 1px solid var(--hairline);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.topbar__actions { display: flex; align-items: center; gap: var(--s-5); flex: none; }
+
+.privacy-badge {
+  display: inline-flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-2) var(--s-4);
+  background: var(--slate); border: 1px solid var(--hairline);
+  border-radius: var(--r-full);
+  color: var(--text-lo); font-size: var(--fs-micro); letter-spacing: .04em;
+}
+.privacy-badge svg { color: var(--jade); }
+
+/* ── 4. Buttons ───────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-3);
+  border: 1px solid transparent; border-radius: var(--r-xs);
+  background: transparent; color: var(--text);
+  padding: var(--s-3) var(--s-5);
+  font-size: var(--fs-body); font-weight: 540; line-height: 1.2;
+  white-space: nowrap;
+  transition: background-color var(--t-fast) var(--ease),
+              border-color var(--t-fast) var(--ease),
+              color var(--t-fast) var(--ease),
+              transform var(--t-fast) var(--ease);
+}
+.btn:hover:not(:disabled) { transform: translateY(-1px); }
+.btn:active:not(:disabled) { transform: translateY(0); }
+.btn:disabled { opacity: .42; cursor: not-allowed; }
+
+.btn--primary {
+  background: var(--ember); color: #140803;
+  border-color: var(--ember);
+  height: 46px; font-size: var(--fs-lead); font-weight: 660;
+  box-shadow: 0 6px 18px -8px var(--ember-a40);
+}
+.btn--primary:hover:not(:disabled) { background: var(--ember-hi); border-color: var(--ember-hi); }
+.btn--primary:active:not(:disabled) { background: var(--ember-dp); border-color: var(--ember-dp); }
+
+.btn--secondary {
+  background: var(--slate); border-color: var(--hairline-hi); color: var(--text-hi);
+  height: 34px; font-size: var(--fs-small);
+}
+.btn--secondary:hover:not(:disabled) { background: var(--slate-hi); border-color: var(--text-lo); }
+
+/* 静默态用 --text 而不是 --text-lo：这两个按钮（三分线 / 重置居中）是真实可用的
+   操作，不是禁用态。--text-lo 在 --graphite 上只有 5.0:1，12.5px 下读起来像灰掉。 */
+.btn--ghost { color: var(--text); font-size: var(--fs-small); height: 30px; padding: 0 var(--s-4); }
+.btn--ghost:hover:not(:disabled) { background: var(--slate); color: var(--text-hi); }
+.btn--ghost[aria-pressed="true"] { background: var(--slate); color: var(--text-hi); }
+
+.btn--sm { height: 32px; padding: 0 var(--s-4); font-size: var(--fs-small); }
+.btn--block { width: 100%; }
+
+/* ── 5. Workspace layout ──────────────────────────────────────────────── */
+.workspace {
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--insp-w);
+  gap: var(--s-6);
+  padding: var(--s-6) var(--s-8) var(--s-9);
+  align-items: start;
+  max-width: 2200px;
+  margin: 0 auto;
+}
+
+.rail, .inspector { display: flex; flex-direction: column; gap: var(--s-6); }
+/* sticky 偏移 = 顶栏高度（12 内边距 ×2 + 30 控件 + 1 描边 = 55）+ 工作区上内边距 16。
+   它必须 ≤ 左栏的自然位置（同一段上内边距），否则页面还没滚动 sticky 就把左栏下推 5px，
+   与舞台 / 右栏的顶边错开。 */
+.rail { position: sticky; top: calc(55px + var(--s-6)); }
+
+.inspector { max-height: calc(100vh - 100px); overflow-y: auto; padding-right: var(--s-1); scrollbar-width: thin; }
+.inspector::-webkit-scrollbar { width: 8px; }
+.inspector::-webkit-scrollbar-thumb { background: var(--hairline-hi); border-radius: var(--r-full); }
+.inspector::-webkit-scrollbar-track { background: transparent; }
+
+/* 关键：.panel 带 overflow:hidden（为了圆角裁切），而 flex item 的自动最小尺寸
+   只在 overflow:visible 时生效。因此面板在 .inspector 的 max-height 下会被压扁成
+   一条，文字直接溢出面板边框。显式禁止收缩 —— 按内容高度撑开，超出部分由
+   .inspector 自身滚动承担。 */
+.rail > *, .inspector > * { flex: 0 0 auto; }
+
+.stage-col { min-width: 0; }
+
+/* ── 6. Steps（编码真实流程顺序） ──────────────────────────────────────── */
+.steps { border: 1px solid var(--hairline); border-radius: var(--r-sm); background: var(--graphite); }
+.steps__list { display: flex; flex-direction: column; }
+
+.steps__item {
+  display: flex; align-items: center; gap: var(--s-4);
+  padding: var(--s-3) var(--s-5);
+  border-left: 2px solid transparent;
+  color: var(--text-lo); font-size: var(--fs-small);
+  transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease),
+              background-color var(--t-fast) var(--ease);
+  cursor: pointer;
+}
+.steps__item + .steps__item { border-top: 1px solid var(--hairline); }
+.steps__item:hover { background: var(--slate); color: var(--text); }
+.steps__no { font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .08em; opacity: .8; }
+.steps__label { font-weight: 520; }
+.steps__item.is-done { color: var(--text); }
+.steps__item.is-done .steps__no { color: var(--jade); opacity: 1; }
+.steps__item.is-current {
+  color: var(--text-hi); border-left-color: var(--ember); background: var(--slate);
+}
+.steps__item.is-current .steps__no { color: var(--ember); opacity: 1; }
+
+/* ── 7. Panel ─────────────────────────────────────────────────────────── */
+.panel {
+  background: var(--graphite);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-sm);
+  box-shadow: var(--sh-1), var(--sh-inset);
+  overflow: hidden;
+}
+.panel--stage { background: var(--graphite); }
+.panel--link { background: var(--graphite); }
+.panel--summary { border-color: var(--hairline-hi); background: var(--slate); }
+
+.panel__head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-7);
+  border-bottom: 1px solid var(--hairline);
+  background: rgba(255, 255, 255, .015);
+}
+.panel__head--row { flex-wrap: wrap; }
+.panel__head-tools { display: flex; align-items: center; gap: var(--s-2); }
+
+.panel__eyebrow {
+  font-size: var(--fs-eyebrow); font-weight: 680;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: var(--text-lo);
+}
+.panel__body { padding: var(--s-7); display: flex; flex-direction: column; gap: var(--s-5); }
+.panel__body--stage { gap: var(--s-6); }
+.panel__lead { color: var(--text); font-size: var(--fs-small); }
+
+.mini-label {
+  font-size: var(--fs-eyebrow); font-weight: 640; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--text-lo);
+}
+.mini-label--spaced { margin-top: var(--s-3); }
+
+/* ── 8. Dropzone ──────────────────────────────────────────────────────── */
+.dropzone {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--s-3);
+  padding: var(--s-8) var(--s-5);
+  border: 1px dashed var(--hairline-hi);
+  border-radius: var(--r-md);
+  background: radial-gradient(120% 100% at 50% 0%, rgba(255, 122, 51, .05), transparent 70%), var(--slate);
+  transition: border-color var(--t-base) var(--ease), background-color var(--t-base) var(--ease),
+              transform var(--t-base) var(--ease);
+}
+.dropzone:hover { border-color: var(--ember-a40); transform: translateY(-1px); }
+.dropzone__icon { color: var(--ember); opacity: .85; }
+.dropzone__title { color: var(--text-hi); font-weight: 620; font-size: var(--fs-lead); }
+.dropzone__sub { color: var(--text-lo); font-size: var(--fs-micro); line-height: 1.7; }
+.dropzone kbd {
+  font-family: var(--font-mono); font-size: 10px;
+  padding: 1px 4px; border: 1px solid var(--hairline-hi); border-radius: 3px;
+  background: var(--graphite); color: var(--text);
+}
+
+/* ── 9. Key/Value list ────────────────────────────────────────────────── */
+.kv { display: flex; flex-direction: column; gap: 1px; margin: 0; }
+.kv__row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-4);
+  padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.kv__row:last-child { border-bottom: 0; }
+.kv__row--stack { flex-direction: column; align-items: stretch; gap: var(--s-2); }
+.kv dt { color: var(--text-lo); font-size: var(--fs-small); flex: none; }
+.kv dd { color: var(--text-hi); font-size: var(--fs-small); text-align: right; }
+.kv__row--stack dd { text-align: left; }
+.kv__file {
+  word-break: break-all;
+  font-family: var(--font-mono); font-size: var(--fs-micro);
+  color: var(--text); line-height: 1.5;
+}
+.kv--compact .kv__row { padding: var(--s-2) 0; }
+
+/* ── 10. Flags ────────────────────────────────────────────────────────── */
+.flag {
+  display: block;
+  padding: var(--s-3) var(--s-5);
+  border-radius: var(--r-xs);
+  border-left: 2px solid currentColor;
+  font-size: var(--fs-small); line-height: 1.55;
+}
+.flag--amber { color: var(--amber); background: rgba(232, 178, 74, .09); }
+.flag--azure { color: var(--azure); background: rgba(107, 166, 245, .09); }
+.flag--neutral { color: var(--text); background: var(--slate); }
+.flag__action { display: block; margin-top: var(--s-4); color: var(--text-hi); border-color: var(--hairline-hi); }
+
+/* ── 11. Stage（签名元素） ────────────────────────────────────────────── */
+.stage-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: var(--s-5); text-align: center;
+  min-height: 380px; padding: var(--s-11) var(--s-7);
+  /* 空态是首屏面积最大、最像「下一步」的元素，所以它本身就是投放/选择控件：
+     描边用 --hairline-hi（不再是几乎看不见的 --hairline），hover 时转 Ember。 */
+  border: 1px dashed var(--hairline-hi); border-radius: var(--r-md);
+  background: radial-gradient(100% 90% at 50% 30%, rgba(255,122,51,.045), transparent 72%);
+  cursor: pointer;
+  transition: border-color var(--t-base) var(--ease), background-color var(--t-base) var(--ease),
+              transform var(--t-base) var(--ease);
+}
+.stage-empty:hover { border-color: var(--ember-a40); background-color: rgba(255, 122, 51, .03); transform: translateY(-1px); }
+.stage-empty:active { transform: translateY(0); }
+.stage-empty__ring { color: var(--ember); opacity: .5; animation: breathe 4.2s var(--ease) infinite; }
+.stage-empty__title { color: var(--text-hi); font-size: var(--fs-display); font-weight: 680; letter-spacing: -.024em; }
+.stage-empty__sub { color: var(--text); font-size: var(--fs-small); max-width: 46ch; line-height: 1.7; }
+.stage-empty__sub kbd {
+  font-family: var(--font-mono); font-size: 10px;
+  padding: 1px 4px; border: 1px solid var(--hairline-hi); border-radius: 3px;
+  background: var(--graphite); color: var(--text-hi);
+}
+
+@keyframes breathe { 0%, 100% { opacity: .38; } 50% { opacity: .68; } }
+
+.stage { display: flex; flex-direction: column; align-items: center; gap: var(--s-4); }
+
+.stage__frame {
+  position: relative;
+  width: 100%;
+  /* 帧高上限要考虑两件事：
+     ① 竖构图（1:1 / 4:5 / 9:16）不能让主 CTA 掉到首屏之外 —— 阈值实测：
+        帧高 532px 时下载按钮底边在 979px，超出 950px 视口；
+     ② 视口很矮时也要保住帧的可读尺寸，所以用 max(280px, …) 兜底，
+        宁可在极矮视口下滚动，也不把画面压成邮票。
+     min(46vh, 100vh - 500px) 中的 500px = 顶栏 + 面板头 + 下方读数条 +
+     取景九宫格 + 主 CTA + 各段间距的固定占用。 */
+  max-width: calc(max(280px, min(46vh, 100vh - 500px)) * var(--stage-ar, 1.7778));
+  aspect-ratio: var(--stage-ar, 1.7778);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  background: #000;
+  border: 1px solid var(--hairline-hi);
+  cursor: grab;
+  touch-action: none;
+  animation: stageIn var(--t-slow) var(--ease-emph) both;
+}
+.stage__frame:active { cursor: grabbing; }
+.stage__frame.is-locked { cursor: default; }
+
+@keyframes stageIn {
+  from { opacity: 0; transform: scale(.985); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.stage__frame canvas {
+  display: block; width: 100%; height: 100%;
+  image-rendering: auto;
+}
+
+/* 三分线 */
+.stage__thirds { position: absolute; inset: 0; pointer-events: none; opacity: 1; transition: opacity var(--t-base) var(--ease); }
+.stage__thirds[hidden] { display: none; }
+.stage__thirds span { position: absolute; background: rgba(255, 255, 255, .16); }
+.stage__thirds span:nth-child(1) { left: 33.333%; top: 0; bottom: 0; width: 1px; }
+.stage__thirds span:nth-child(2) { left: 66.666%; top: 0; bottom: 0; width: 1px; }
+.stage__thirds span:nth-child(3) { top: 33.333%; left: 0; right: 0; height: 1px; }
+.stage__thirds span:nth-child(4) { top: 66.666%; left: 0; right: 0; height: 1px; }
+
+/* 裁剪角标 */
+.stage__brackets { position: absolute; inset: 0; pointer-events: none; }
+.br { position: absolute; width: 22px; height: 22px; border: 0 solid var(--ember); transition: width var(--t-fast) var(--ease), height var(--t-fast) var(--ease); }
+.br--tl { top: 8px; left: 8px; border-top-width: 2px; border-left-width: 2px; border-top-left-radius: 3px; }
+.br--tr { top: 8px; right: 8px; border-top-width: 2px; border-right-width: 2px; border-top-right-radius: 3px; }
+.br--bl { bottom: 8px; left: 8px; border-bottom-width: 2px; border-left-width: 2px; border-bottom-left-radius: 3px; }
+.br--br { bottom: 8px; right: 8px; border-bottom-width: 2px; border-right-width: 2px; border-bottom-right-radius: 3px; }
+
+.stage__frame:hover .br { width: 34px; height: 34px; }
+.stage__frame.is-dragging .br { width: 40px; height: 40px; }
+
+/* 原图取景视图：完整原图 + 裁剪框，框外压暗 —— 让用户看得见被裁掉的部分。
+   裁剪框角标让位于框本身（.stage__brackets 指的是整帧，此视图下无意义，隐藏）。 */
+.stage__frame.is-source-view .stage__brackets { display: none; }
+
+.stage__crop {
+  position: absolute;
+  z-index: 2;
+  border: 1px solid var(--ember);
+  box-shadow: 0 0 0 9999px rgba(10, 12, 15, .62);
+  pointer-events: none;
+}
+.stage__crop[hidden] { display: none; }
+
+.crop-tick { position: absolute; width: 15px; height: 15px; border: 0 solid var(--ember); }
+.crop-tick--tl { top: -1px; left: -1px; border-top-width: 3px; border-left-width: 3px; }
+.crop-tick--tr { top: -1px; right: -1px; border-top-width: 3px; border-right-width: 3px; }
+.crop-tick--bl { bottom: -1px; left: -1px; border-bottom-width: 3px; border-left-width: 3px; }
+.crop-tick--br { bottom: -1px; right: -1px; border-bottom-width: 3px; border-right-width: 3px; }
+
+.stage__crop-tag {
+  position: absolute;
+  left: 6px; top: 6px;
+  padding: 1px var(--s-3);
+  background: rgba(10, 12, 15, .8);
+  border: 1px solid var(--ember-a40);
+  border-radius: var(--r-xs);
+  color: var(--ember);
+  font-size: var(--fs-micro);
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+/* 处理中遮罩 */
+.stage__busy {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--s-5);
+  background: rgba(10, 12, 15, .74);
+  backdrop-filter: blur(2px);
+  animation: fadeIn var(--t-base) var(--ease) both;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.scanner { width: 168px; height: 3px; border-radius: var(--r-full); background: var(--slate-hi); overflow: hidden; }
+.scanner i {
+  display: block; width: 42%; height: 100%;
+  background: linear-gradient(90deg, transparent, var(--ember), transparent);
+  animation: scan 1.6s var(--ease) infinite;
+}
+@keyframes scan { 0% { transform: translateX(-110%); } 100% { transform: translateX(340%); } }
+.stage__busy-text { color: var(--text-hi); font-size: var(--fs-small); }
+
+.stage__hint {
+  display: inline-flex; align-items: center; gap: var(--s-3);
+  color: var(--text-lo); font-size: var(--fs-micro);
+}
+.stage__hint-grip { color: var(--ember); letter-spacing: -2px; }
+.stage__hint[hidden] { display: none; }
+
+/* ── 12. Readout strip ────────────────────────────────────────────────── */
+.readout {
+  position: relative;
+  display: flex; flex-wrap: wrap; align-items: stretch; gap: var(--s-2) var(--s-5);
+  padding: var(--s-5) var(--s-6);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-sm);
+  background: var(--slate);
+  overflow: hidden;
+}
+.readout__item { display: flex; flex-direction: column; gap: var(--s-1); min-width: 0; }
+.readout__item--wide { flex: 1 1 auto; }
+.readout__label {
+  font-size: 9.5px; font-weight: 640; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--text-lo);
+}
+.readout__value { color: var(--text-hi); font-size: var(--fs-readout); font-weight: 560; line-height: 1.15; }
+.readout__value--sm { font-size: var(--fs-lead); font-family: var(--font-mono); padding-top: var(--s-2); }
+.readout__separator { width: 1px; background: var(--hairline); align-self: stretch; }
+.readout__item--status { justify-content: flex-end; margin-left: auto; }
+
+.status-pill {
+  display: inline-flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-2) var(--s-5);
+  border-radius: var(--r-full);
+  font-size: var(--fs-small); font-weight: 560;
+  border: 1px solid currentColor;
+}
+.status-pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+.status-pill[data-state="idle"]    { color: var(--text-lo); }
+.status-pill[data-state="busy"]    { color: var(--ember); }
+.status-pill[data-state="ok"]      { color: var(--jade); }
+.status-pill[data-state="warn"]    { color: var(--amber); }
+.status-pill[data-state="error"]   { color: var(--coral); }
+
+.readout__progress { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--hairline); }
+.readout__progress i { display: block; height: 100%; width: 38%; background: var(--ember); animation: scan 1.6s var(--ease) infinite; }
+.readout__progress[hidden] { display: none; }
+
+/* ── 13. Focus grid ───────────────────────────────────────────────────── */
+.focus-block {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-7);
+  padding: var(--s-5) var(--s-6);
+  border: 1px solid var(--hairline); border-radius: var(--r-sm);
+  background: var(--slate);
+}
+.focus-block__head { display: flex; flex-direction: column; gap: var(--s-2); }
+.focus-block__readout { color: var(--text-hi); }
+.focus-grid {
+  display: grid; grid-template-columns: repeat(3, 26px); grid-template-rows: repeat(3, 26px);
+  gap: 3px; padding: 3px;
+  border: 1px solid var(--hairline-hi); border-radius: var(--r-xs);
+  background: var(--graphite);
+}
+.focus-grid__cell {
+  /* 同上：九宫格是纯边框控件，--hairline 只有 1.18:1，格线几乎看不见 */
+  border: 1px solid var(--text-lo); border-radius: 3px; background: var(--slate);
+  transition: background-color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+.focus-grid__cell:hover { background: var(--slate-hi); border-color: var(--text-lo); }
+.focus-grid__cell.is-active { background: var(--ember); border-color: var(--ember); }
+
+/* ── 14. Stage actions ────────────────────────────────────────────────── */
+.stage-actions { display: flex; flex-direction: column; gap: var(--s-3); }
+.stage-actions__note { text-align: center; color: var(--text-lo); font-size: var(--fs-micro); }
+
+/* ── 15. Chips ────────────────────────────────────────────────────────── */
+.chips { display: flex; flex-wrap: wrap; gap: var(--s-3); }
+.chips--stack { flex-direction: column; flex-wrap: nowrap; }
+.chips--tight { gap: var(--s-2); flex: 1 1 auto; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-2) var(--s-5);
+  border: 1px solid var(--hairline); border-radius: var(--r-xs);
+  background: var(--slate); color: var(--text);
+  font-size: var(--fs-small); font-weight: 520;
+  transition: background-color var(--t-base) var(--ease), border-color var(--t-base) var(--ease),
+              color var(--t-base) var(--ease), transform var(--t-fast) var(--ease);
+}
+.chip:hover { background: var(--slate-hi); border-color: var(--hairline-hi); color: var(--text-hi); }
+.chip:active { transform: translateY(1px); }
+.chip.is-active {
+  background: var(--ember-a12); border-color: var(--ember-a40); color: var(--text-hi);
+  box-shadow: inset 2px 0 0 var(--ember);
+}
+.chip--xs { padding: 2px var(--s-4); font-family: var(--font-mono); font-size: var(--fs-micro); }
+.chip--wide {
+  flex-direction: column; align-items: flex-start; gap: 1px; width: 100%;
+  padding: var(--s-4) var(--s-5);
+}
+.chip__main { font-size: var(--fs-small); font-weight: 580; }
+.chip__meta { color: var(--text-lo); font-size: var(--fs-micro); }
+.chip.is-active .chip__meta { color: var(--text); }
+/* hover 时底色抬到 --slate-hi，11px 的次级文字必须跟着提亮：
+   --text-lo on --slate-hi 只有 4.06:1（低于 AA 的 4.5:1），--text 为 6.01:1。 */
+.chip:hover .chip__meta { color: var(--text); }
+
+/* ── 16. Platform presets ─────────────────────────────────────────────── */
+.presets { display: flex; flex-direction: column; gap: var(--s-6); }
+.preset-group { display: flex; flex-direction: column; gap: var(--s-3); }
+.preset-group__name { font-size: var(--fs-micro); color: var(--text-lo); letter-spacing: .08em; }
+.preset-group__items { display: flex; flex-direction: column; gap: var(--s-2); }
+
+.preset {
+  display: flex; align-items: center; gap: var(--s-4);
+  padding: var(--s-4) var(--s-5);
+  border: 1px solid var(--hairline); border-radius: var(--r-xs);
+  background: var(--slate);
+  box-shadow: inset 2px 0 0 transparent;
+  transition: background-color var(--t-base) var(--ease), border-color var(--t-base) var(--ease),
+              box-shadow var(--t-base) var(--ease);
+  text-align: left;
+}
+.preset:hover { background: var(--slate-hi); border-color: var(--hairline-hi); }
+.preset.is-active { box-shadow: inset 2px 0 0 var(--ember); border-color: var(--ember-a40); background: var(--ember-a12); }
+.preset__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
+.preset__name { color: var(--text-hi); font-size: var(--fs-small); font-weight: 560; }
+.preset__ratio { color: var(--text-lo); font-size: var(--fs-micro); }
+/* 同 .chip:hover 的理由：hover 底色为 --slate-hi，11px 次级文字需 ≥4.5:1 */
+.preset:hover .preset__ratio { color: var(--text); }
+.preset__apply {
+  flex: none; border: 1px solid var(--hairline-hi); border-radius: var(--r-xs);
+  background: var(--graphite); color: var(--text);
+  font-family: var(--font-mono); font-size: var(--fs-micro);
+  padding: 3px var(--s-4);
+  transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease);
+}
+.preset__apply:hover { color: var(--text-hi); border-color: var(--ember-a40); background: var(--slate); }
+
+/* ── 17. Fields / inputs ──────────────────────────────────────────────── */
+.field { display: flex; flex-direction: column; gap: var(--s-3); }
+.field--spaced { padding-top: var(--s-5); border-top: 1px solid var(--hairline); }
+.field__head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); }
+.field__row { display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; }
+.field__value { color: var(--text-hi); }
+.field__hint { color: var(--text-lo); font-size: var(--fs-micro); line-height: 1.6; }
+.field__msg { color: var(--coral); font-size: var(--fs-small); }
+.field__msg[hidden] { display: none; }
+
+.input {
+  /* 边框用 --text-lo（对 --slate 4.54:1）而非 --hairline-hi（1.46:1）：
+     输入框的填充色与面板底几乎无差（1.10:1），边框是它唯一的可辨识边界，
+     必须满足 WCAG 1.4.11 非文本对比度 3:1。 */
+  background: var(--slate); border: 1px solid var(--text-lo); border-radius: var(--r-xs);
+  color: var(--text-hi); padding: 0 var(--s-5); height: 36px;
+  transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease);
+  min-width: 0;
+}
+.input::placeholder { color: var(--text-lo); }
+.input:hover { border-color: var(--text-lo); }
+.input:focus { outline: none; border-color: var(--ember); box-shadow: 0 0 0 3px var(--ember-a24); }
+.input[aria-invalid="true"] { border-color: var(--coral); }
+.input[aria-invalid="true"]:focus { box-shadow: 0 0 0 3px rgba(255, 106, 94, .22); }
+.input--num { width: 78px; font-family: var(--font-mono); font-size: var(--fs-mono); text-align: center; }
+.input--color { width: 46px; height: 36px; padding: 3px; cursor: pointer; border-radius: var(--r-xs); }
+.input--color::-webkit-color-swatch-wrapper { padding: 0; }
+.input--color::-webkit-color-swatch { border: 1px solid var(--hairline-hi); border-radius: 2px; }
+
+.ratio-custom { display: flex; flex-direction: column; gap: var(--s-3); }
+.ratio-custom .field--inline { flex-direction: row; align-items: center; gap: var(--s-3); }
+.ratio-custom input { width: 68px; }
+.ratio-custom__colon { color: var(--text-lo); font-family: var(--font-mono); }
+
+.range {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 4px; border-radius: var(--r-full);
+  background: var(--slate-hi); cursor: pointer;
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--ember); border: 2px solid var(--obsidian);
+  box-shadow: 0 0 0 1px var(--ember-a40);
+  transition: transform var(--t-fast) var(--ease);
+}
+.range::-webkit-slider-thumb:hover { transform: scale(1.12); }
+.range::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--ember); border: 2px solid var(--obsidian);
+}
+
+.swatches { display: flex; gap: var(--s-2); }
+.swatch {
+  width: 24px; height: 24px; border-radius: var(--r-xs);
+  background: var(--sw); border: 1px solid var(--hairline-hi);
+  transition: transform var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+.swatch:hover { transform: translateY(-1px); border-color: var(--ember); }
+.swatch.is-active { border-color: var(--ember); box-shadow: 0 0 0 2px var(--ember-a24); }
+
+/* ── 18. Segmented ────────────────────────────────────────────────────── */
+.segmented {
+  display: inline-flex; padding: 2px; gap: 2px;
+  /* 分段控件的边框同样是它的唯一可辨识边界（WCAG 1.4.11 ≥ 3:1） */
+  background: var(--slate); border: 1px solid var(--text-lo); border-radius: var(--r-xs);
+}
+.segmented__btn {
+  border: 0; border-radius: 3px; background: transparent; color: var(--text);
+  padding: var(--s-3) var(--s-6); font-size: var(--fs-small); font-weight: 560;
+  transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.segmented__btn:hover { color: var(--text-hi); }
+.segmented__btn.is-active { background: var(--ember); color: #140803; }
+.segmented--sm .segmented__btn { padding: var(--s-2) var(--s-4); font-size: var(--fs-micro); }
+
+/* ── 19. Summary ──────────────────────────────────────────────────────── */
+.summary { display: flex; flex-direction: column; }
+.summary__row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-5);
+  padding: var(--s-3) 0; border-bottom: 1px solid var(--hairline);
+}
+.summary__row:last-child { border-bottom: 0; }
+.summary dt { color: var(--text-lo); font-size: var(--fs-small); flex: none; }
+.summary dd { color: var(--text-hi); font-size: var(--fs-small); text-align: right; word-break: break-word; }
+.summary__row--verdict { padding-top: var(--s-5); border-top: 1px solid var(--hairline-hi); border-bottom: 0; }
+.summary__foot {
+  padding-top: var(--s-4); color: var(--text-lo); font-size: var(--fs-micro); line-height: 1.6;
+  border-top: 1px solid var(--hairline); margin-top: var(--s-1);
+}
+
+.verdict { display: inline-flex; align-items: center; gap: var(--s-2); font-weight: 560; font-size: var(--fs-small); }
+.verdict--ok   { color: var(--jade); }
+.verdict--warn { color: var(--amber); }
+.verdict--idle { color: var(--text-lo); }
+
+/* ── 20. Toasts ───────────────────────────────────────────────────────── */
+.toasts {
+  position: fixed; right: var(--s-7); bottom: var(--s-7); z-index: 60;
+  display: flex; flex-direction: column-reverse; gap: var(--s-4);
+  width: min(380px, calc(100vw - var(--s-9)));
+  pointer-events: none;
+}
+.toast {
+  display: flex; align-items: flex-start; gap: var(--s-4);
+  padding: var(--s-5);
+  background: var(--slate);
+  border: 1px solid var(--hairline-hi);
+  border-left: 3px solid var(--azure);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-2);
+  pointer-events: auto;
+  animation: toastIn var(--t-base) var(--ease-emph) both;
+}
+@keyframes toastIn { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+.toast.is-leaving { animation: toastOut var(--t-base) var(--ease) both; }
+@keyframes toastOut { to { opacity: 0; transform: translateY(6px) scale(.98); } }
+
+.toast[data-kind="success"] { border-left-color: var(--jade); }
+.toast[data-kind="error"]   { border-left-color: var(--coral); }
+.toast[data-kind="warn"]    { border-left-color: var(--amber); }
+
+.toast__body { flex: 1 1 auto; display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; }
+.toast__title { color: var(--text-hi); font-size: var(--fs-small); font-weight: 620; }
+.toast__msg { color: var(--text); font-size: var(--fs-small); line-height: 1.55; word-break: break-word; }
+.toast__msg .mono { color: var(--text-hi); }
+.toast__close {
+  flex: none; width: 22px; height: 22px; border-radius: var(--r-xs);
+  border: 0; background: transparent; color: var(--text-lo); font-size: 15px; line-height: 1;
+  transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.toast__close:hover { background: var(--slate-hi); color: var(--text-hi); }
+
+/* ── 21. Drag veil ────────────────────────────────────────────────────── */
+.veil {
+  position: fixed; inset: 0; z-index: 80;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(10, 12, 15, .82);
+  backdrop-filter: blur(6px);
+  opacity: 0; visibility: hidden;
+  transition: opacity var(--t-base) var(--ease), visibility var(--t-base);
+}
+.veil.is-on { opacity: 1; visibility: visible; }
+.veil__inner {
+  display: flex; flex-direction: column; align-items: center; gap: var(--s-5);
+  padding: var(--s-11) var(--s-12);
+  border: 2px dashed var(--ember);
+  border-radius: var(--r-md);
+  color: var(--ember);
+  background: rgba(255, 122, 51, .05);
+  transform: scale(.96);
+  transition: transform var(--t-base) var(--ease-emph);
+}
+.veil.is-on .veil__inner { transform: scale(1); animation: veilPulse 1.8s var(--ease) infinite; }
+@keyframes veilPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 122, 51, .0); }
+  50%      { box-shadow: 0 0 0 12px rgba(255, 122, 51, .07); }
+}
+.veil__title { color: var(--text-hi); font-size: var(--fs-display); font-weight: 660; letter-spacing: -.02em; }
+.veil__sub { color: var(--text); font-size: var(--fs-small); font-family: var(--font-mono); }
+
+/* ── 22. Responsive ───────────────────────────────────────────────────── */
+@media (max-width: 1440px) {
+  :root { --insp-w: 344px; --rail-w: 240px; }
+}
+
+@media (max-width: 1279px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr) var(--insp-w);
+    padding: var(--s-6);
+  }
+  .rail { position: static; grid-column: 1 / -1; flex-direction: row; align-items: stretch; }
+  /* align-items: stretch 会把步骤条拉成与「01 素材」面板等高的大空盒（1024–1279px 实测 446px 中约 250px 是空白），
+     让它按自身高度靠上即可；行高仍由素材面板决定。 */
+  .rail .steps { flex: none; align-self: flex-start; }
+  .steps__list { flex-direction: row; }
+  .steps__item { border-left: 0; border-bottom: 2px solid transparent; }
+  .steps__item + .steps__item { border-top: 0; border-left: 1px solid var(--hairline); }
+  .steps__item.is-current { border-left-color: var(--hairline); border-bottom-color: var(--ember); background: var(--slate); }
+  .rail .panel { flex: 1 1 auto; }
+  .inspector { max-height: none; overflow: visible; }
+}
+
+@media (max-width: 900px) {
+  .workspace { grid-template-columns: minmax(0, 1fr); }
+  .topbar { flex-wrap: wrap; gap: var(--s-5); padding: var(--s-5) var(--s-6); }
+  .brand__tag { display: none; }
+  .inspector { order: 3; }
+  .stage-col { order: 2; }
+}
+
+@media (max-width: 768px) {
+  :root { --fs-display: 24px; --fs-readout: 18px; }
+  .workspace { padding: var(--s-5); gap: var(--s-5); }
+  .panel__body { padding: var(--s-5); }
+  .rail { flex-direction: column; }
+  .steps__list { flex-wrap: wrap; }
+  .steps__item { flex: 1 1 33%; justify-content: center; }
+  .stage__frame { max-width: 100%; }
+  .readout { gap: var(--s-4); }
+  .readout__separator { display: none; }
+  .readout__item--status { margin-left: 0; width: 100%; }
+  .focus-block { flex-direction: column; align-items: flex-start; gap: var(--s-5); }
+  .toasts { right: var(--s-5); bottom: var(--s-5); left: var(--s-5); width: auto; }
+  .stage-empty { min-height: 260px; padding: var(--s-9) var(--s-5); }
+}
+
+/* ── 23. Reduced motion ───────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .stage__frame { animation: none; }
+  .stage-empty__ring { animation: none; opacity: .55; }
+  .scanner i, .readout__progress i { animation: none; width: 100%; opacity: .5; }
+  .veil.is-on .veil__inner { animation: none; }
+}
