@@ -10,6 +10,11 @@ ratio → set a budget → adjust the crop → export.
 
 ## 1. Open the app
 
+**Option zero — use the hosted build: <https://zyphraxns.github.io/cover-forge/>** (GitHub Pages).
+It is equivalent to running it locally: image processing still happens on your device
+and is never uploaded. Handy when you want to share a link or use it on a machine
+without the files.
+
 Double-click `index.html`. That is it.
 
 - Nothing to install. No package manager, no build step, no dependencies.
