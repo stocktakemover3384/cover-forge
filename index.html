@@ -38,6 +38,7 @@
       </svg>
       <span>本地处理 · 不联网</span>
     </p>
+    <button type="button" class="btn btn--ghost" id="btn-lang" title="Switch to English" aria-label="Switch to English">EN</button>
     <button type="button" class="btn btn--ghost" id="btn-reset-all" disabled>重置</button>
   </div>
 </header>
@@ -287,7 +288,7 @@
 
         <p class="flag flag--amber" id="flag-tiny" hidden>目标偏小，画质损失可能较明显。</p>
         <p class="flag flag--azure" id="flag-png" hidden>
-          PNG 是无损格式，无法用质量参数控制体积。
+          <span id="flag-png-text">PNG 是无损格式，无法用质量参数控制体积。</span>
           <button type="button" class="btn btn--secondary btn--sm flag__action" id="btn-switch-jpg">改为 JPG 以达到目标大小</button>
         </p>
       </div>
@@ -365,7 +366,7 @@
             <button type="button" class="segmented__btn" data-format="image/jpeg" aria-pressed="false">JPG</button>
             <button type="button" class="segmented__btn" data-format="image/png" aria-pressed="false">PNG</button>
           </div>
-          <p class="field__hint" id="format-hint">JPG 体积小、适合照片；PNG 无损、适合文字与图形。</p>
+          <p class="field__hint" id="format-hint">JPG 体积小、适合照片；透明区域会按所选背景色填充。</p>
         </div>
 
         <div class="field field--spaced" id="bg-field" hidden>
@@ -423,6 +424,7 @@
 <!-- ══ TOASTS ══════════════════════════════════════════════════════════ -->
 <div class="toasts" id="toasts" role="status" aria-live="polite" aria-atomic="false"></div>
 
+<script src="i18n.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

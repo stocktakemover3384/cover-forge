@@ -1,6 +1,6 @@
 # CoverForge — Usage Guide
 
-[中文使用说明（更详细）](USAGE.zh-CN.md) · [README](README.md)
+[Detailed guide in Chinese](USAGE.zh-CN.md) · [README](README.md)
 
 Everything in CoverForge happens locally, in one page, with no installation and no
 network access. This guide walks through the whole flow: open → upload → choose a
@@ -17,6 +17,10 @@ without the files.
 
 Double-click `index.html`. That is it.
 
+- **The interface is bilingual (中文 / English).** Use the **EN** button in the top bar to
+  switch; the choice is remembered on this device. This guide documents the English
+  labels — if you keep the Chinese interface, read `USAGE.zh-CN.md` instead.
+
 - Nothing to install. No package manager, no build step, no dependencies.
 - `file://` works. `app.js` is a classic script inside an IIFE on purpose:
   `<script type="module">` is blocked by CORS under `file://`, and CoverForge must
@@ -32,7 +36,7 @@ Double-click `index.html`. That is it.
 - **The settings column scrolls on its own.** In the three-column desktop layout
   (window width ≥ 1280 px) the right-hand column is height-capped to the viewport and
   scrolls internally — the six panels together are much taller than the screen, so
-  scroll *inside* that column to reach 06 · 导出 and 导出前信息. Narrower windows switch
+  scroll *inside* that column to reach **06 · Export** and **Before you export**. Narrower windows switch
   to a stacked layout where the whole page scrolls instead.
 
 ## 2. Upload an image
@@ -42,7 +46,7 @@ Three equivalent ways:
 | Method | How |
 |---|---|
 | Click | Click the **drop zone** in the left rail (or focus it and press `Enter` / `Space`) |
-| Drag | Drag a file onto **anywhere on the page** — a drop overlay appears ("松开即可载入"), release to load |
+| Drag | Drag a file onto **anywhere on the page** — a drop overlay appears ("Release to load"), release to load |
 | Paste | Press `Ctrl`+`V` / `⌘`+`V` — a screenshot from your clipboard works directly |
 
 - Only the **first** file is used if you drop several.
@@ -51,7 +55,7 @@ Three equivalent ways:
   failure.
 - Supported: JPG, PNG, WebP, GIF, BMP (and AVIF where the browser can decode it).
   Animated GIF/WebP sources load as a single still frame.
-- Loading a new image replaces the current one. Use **换一张图片** or the **重置**
+- Loading a new image replaces the current one. Use **Change image** or the **Reset**
   button (top right) instead of reloading the page.
 
 The left panel then lists the source: file name, pixel dimensions, megapixels,
@@ -83,7 +87,7 @@ Two different clicks, two different results:
   output size to that preset's recommended pixels.
 
 **Custom ratio** — type both numbers (each between 0 and 100, decimals allowed,
-e.g. `2.35 : 1`) and press `Enter` or **套用**. Invalid values are rejected inline
+e.g. `2.35 : 1`) and press `Enter` or **Apply**. Invalid values are rejected inline
 instead of failing silently.
 
 Changing the ratio (generic chip or custom) resets the output size to
@@ -92,9 +96,9 @@ ratio.
 
 ## 4. Set a target file size
 
-- Quick chips: **不限** (unlimited, highest quality), **200 KB**, **500 KB**,
+- Quick chips: **No limit** (unlimited, highest quality), **200 KB**, **500 KB**,
   **1 MB**, **2 MB**.
-- Custom: type a number, pick **KB** or **MB**, then press `Enter` or **套用**.
+- Custom: type a number, pick **KB** or **MB**, then press `Enter` or **Apply**.
   Typing also applies automatically about 0.4 s after you stop.
 - Leaving the field empty means **unlimited**.
 - The maximum accepted target is **50 MB**; larger values are rejected with a
@@ -120,16 +124,16 @@ frame, is never stretched, and never gets black bars.
 
 ### Pick a preview view first
 
-The preview header has a view switch: `成片` / `原图取景`.
+The preview header has a view switch: `Result` / `Framing`.
 
 | View | What it shows | When to use it |
 |---|---|---|
-| **成片** (default) | The cropped, compressed result — the frame ratio equals the output ratio. | Judging the finished cover. |
-| **原图取景** | The **whole source image** (frame ratio equals the source ratio) with a crop box on top and everything outside it dimmed. The box carries a tag showing the output pixels. | Deciding which part to keep, and confirming you are not cropping anything important away. |
+| **Result** (default) | The cropped, compressed result — the frame ratio equals the output ratio. | Judging the finished cover. |
+| **Framing** | The **whole source image** (frame ratio equals the source ratio) with a crop box on top and everything outside it dimmed. The box carries a tag showing the output pixels. | Deciding which part to keep, and confirming you are not cropping anything important away. |
 
 Only showing the result leaves one question unanswered: what is being thrown away?
 The source view answers it, which is the only reliable way to avoid cropping a head
-out of frame. Picking the 取景 step in the left rail switches you to this view and
+out of frame. Picking the Framing step in the left rail switches you to this view and
 scrolls to the stage.
 
 ### Moving the crop
@@ -140,54 +144,54 @@ The two views deliberately behave like mirror images:
 
 | View | What you drag | Hint text |
 |---|---|---|
-| 成片 | The **image**, so the crop window moves the opposite way (like most crop tools) | 「在框内拖动可调整取景焦点」 |
-| 原图取景 | The **crop box**, which moves with your finger | 「拖动裁剪框，决定保留原图的哪一块」 |
+| Result | The **image**, so the crop window moves the opposite way (like most crop tools) | "Drag inside the frame to move the crop" |
+| Framing | The **crop box**, which moves with your finger | "Drag the crop box to choose which part to keep" |
 
 - Dragging only does something when there is slack — if the source already matches the
   target ratio exactly, the frame is locked and the hint is hidden.
-- In the 成片 view the drag redraws on the fly without re-encoding, so it stays
+- In the Result view the drag redraws on the fly without re-encoding, so it stays
   responsive; encoding happens on release. In the source view the box and the readouts
   follow your finger the same way.
 - `Esc` cancels a drag in progress.
 - **3×3 focus grid** — nine buttons for the corners, edge midpoints and centre. The
   keyboard-friendly equivalent of dragging, working in both views.
-- **重置居中** — back to a centred crop.
-- **三分线** — toggles the rule-of-thirds overlay (a framing aid only; it is never
+- **Re-centre** — back to a centred crop.
+- **Thirds** — toggles the rule-of-thirds overlay (a framing aid only; it is never
   exported). In the source view the thirds align to the crop box, which is the only
   place they mean anything.
-- The 取景 panel reports the crop rectangle (`W × H @ (x, y)`) and the horizontal /
+- The Framing panel reports the crop rectangle (`W × H @ (x, y)`) and the horizontal /
   vertical slack in pixels, so you know how much room you actually have.
 
 ## 6. Choose the output size
 
 | Strategy | What it does | When to use it |
 |---|---|---|
-| **最大可用** (default) | Output = the full crop area. Never downscales on its own. | You want maximum quality and have no pixel requirement. |
-| **平台推荐** | Uses the applied preset's pixel size (e.g. 1920 × 1080). | You want exactly what the platform asks for. Enabled once a platform preset has been applied. |
-| **自定义长边** | Scales so the longer side equals your value (16–10000; quick values 1920 / 1280 / 1080 / 800). | An internal guideline, a CMS limit, or a website hero image. |
+| **Maximum available** (default) | Output = the full crop area. Never downscales on its own. | You want maximum quality and have no pixel requirement. |
+| **Platform preset** | Uses the applied preset's pixel size (e.g. 1920 × 1080). | You want exactly what the platform asks for. Enabled once a platform preset has been applied. |
+| **Custom long edge** | Scales so the longer side equals your value (16–10000; quick values 1920 / 1280 / 1080 / 800). | An internal guideline, a CMS limit, or a website hero image. |
 
 If the requested output is smaller than the crop, a note tells you the result is a
 percentage of the available resolution. If it is larger, CoverForge upscales
 progressively and says so, including the factor:
 
-> 将放大 4.80×（原始像素不足，多出的细节由插值生成，画质可能下降）
+> Upscaling 4.80× — the source lacks pixels, so the extra detail is interpolated and sharpness may suffer.
 
 That notice is not decoration — an upscaled cover is genuinely softer than the
 original. Choose a smaller output size if you can.
 
-Note that **最大可用** means "do not downscale voluntarily"; if you have also set a
+Note that **Maximum available** means "do not downscale voluntarily"; if you have also set a
 target file size that cannot be met at full resolution, the compression step will
-reduce the resolution anyway, and the 分辨率变化 row will show it.
+reduce the resolution anyway, and the Resolution change row will show it.
 
 ## 7. Choose the export format and background colour
 
 - **JPG** — small files, ideal for photos. Quality is decided automatically from
-  your target size. Dragging the **手动覆盖 JPG 质量** slider overrides that: 0 % on
+  your target size. Dragging the **Override JPG quality** slider overrides that: 0 % on
   the left means "automatic"; anything above it forces that quality and the target
   size is no longer enforced.
 - **PNG** — lossless, keeps transparency, but the size cannot be controlled by any
   quality parameter. If you set a target while PNG is selected, the app says so and
-  offers a one-click **改为 JPG** button.
+  offers a one-click **Switch to JPG** button.
 - **Fill colour** appears only when the source has an alpha channel and you are
   exporting JPG: transparent pixels get filled with the chosen colour. Four presets
   (white, near-black, off-white, brand orange) plus a full colour picker. If your
@@ -197,19 +201,19 @@ reduce the resolution anyway, and the 分辨率变化 row will show it.
 
 Everything you need to decide before downloading. The panel's own lead sentence is
 worth reading once: all of these numbers come from the single file that is about to
-be downloaded — 预估文件大小 is not an estimate, it is that file's real byte count.
+be downloaded — **Estimated file size** is not an estimate, it is that file's real byte count.
 
 | Row | Meaning |
 |---|---|
-| 输出尺寸 | Final pixel dimensions of the exported file |
-| 画面比例 | The ratio you chose plus its decimal value |
-| 格式 | JPG or PNG |
-| 目标体积 | Your budget, or 不限（最高画质） |
-| 预估文件大小 | The size of the file you are about to download |
-| 编码质量 | `n%（自动匹配体积）` with a target, `n%（固定高画质）` (0.92) when the target is unlimited, `n%（手动指定）` for a manual override, or `无损（PNG）` |
-| 分辨率变化 | 原始分辨率 / 放大 n× / 缩小 n×, plus a further reduction if the size search had to downscale |
-| 处理耗时 | Wall-clock time for the last render |
-| 目标达成 | ✅ 达标 · used n% of the budget — or ⚠ 未达标 · over by X |
+| Output size | Final pixel dimensions of the exported file |
+| Aspect ratio | The ratio you chose plus its decimal value |
+| Format | JPG or PNG |
+| Target size | Your budget, or No limit (highest quality) |
+| Estimated file size | The size of the file you are about to download |
+| Encode quality | `n% (matched to target size)` with a target, `n% (fixed high quality)` (0.92) when the target is unlimited, `n% (set manually)` for a manual override, or `Lossless (PNG)` |
+| Resolution change | Native resolution / Upscaled n× / Downscaled n×, plus a further reduction if the size search had to downscale |
+| Processing time | Wall-clock time for the last render |
+| Target met | ✅ Target met · used n% of the budget — or ⚠ Target missed · over by X |
 
 **Why the predicted size is trustworthy:** the number is the byte length of the very
 blob that the download button hands to your browser, and the panel says so. There is
@@ -218,7 +222,7 @@ finish rendering first. The displayed value is rounded (0.1 KB granularity below
 1 MB), so it can differ from the exact byte count by less than a kilobyte — the file
 itself is the same one the panel measured.
 
-**未达标 (target not met)** means exactly one of these:
+**Target missed** means exactly one of these:
 
 1. The target is below what the format can physically reach — PNG is lossless, so no
    quality setting helps. Switch to JPG.
@@ -234,9 +238,9 @@ the resolution was reduced to hit the budget, and whether the output was upscale
 
 | Notice | Where | What it means |
 |---|---|---|
-| Upscale notice | 输出尺寸 panel, and 分辨率变化 | The output is larger than your crop, so detail is interpolated. The factor is shown honestly. |
-| PNG lossless notice | 目标文件大小 panel | You set a target while exporting PNG; size cannot be controlled by quality. One-click switch to JPG is offered. |
-| Quality-risk notice | 目标文件大小 panel, when the target is under 50 KB | Such a small budget will visibly cost quality. |
+| Upscale notice | Output size panel, and Resolution change | The output is larger than your crop, so detail is interpolated. The factor is shown honestly. |
+| PNG lossless notice | Target file size panel | You set a target while exporting PNG; size cannot be controlled by quality. One-click switch to JPG is offered. |
+| Quality-risk notice | Target file size panel, when the target is under 50 KB | Such a small budget will visibly cost quality. |
 | Over-target warning | A toast after the download finishes, only if the file exceeded your target | Tells you the actual size, the target, and what to try — switch to JPG, pick a smaller output size, or accept the weight. |
 
 None of these block you. They exist so that you find out before exporting — or at the
@@ -244,8 +248,8 @@ very latest the moment the file lands — and not after you have uploaded it som
 
 ## 10. Download
 
-Click **下载封面**. The button label always states the format and the exact output
-pixels, e.g. *下载 JPG · 1920 × 1080*.
+Click **Download cover**. The button label always states the format and the exact output
+pixels, e.g. *Download JPG · 1920 × 1080*.
 
 File naming: `<original name without extension>-<ratio>-<width>x<height>.<ext>`
 
@@ -258,7 +262,7 @@ A confirmation toast repeats the file name, the final size, whether the target w
 met, and how long the render took.
 
 If the downloaded file exceeds your target, a second, warning-styled toast follows
-immediately — titled 未达到目标体积, quoting the real size and the target, and
+immediately — titled "Target size not met", quoting the real size and the target, and
 suggesting what to try (switch to JPG, or pick a smaller output size). It blocks
 nothing; it just makes sure you do not walk away believing the budget was met.
 
@@ -274,7 +278,7 @@ Because quality has a floor. CoverForge searches JPEG quality between 0.40 and 0
 first; only if the lowest quality still exceeds the budget does it reduce the
 resolution. That order is deliberate: a slightly smaller sharp image beats a
 full-size one smeared with JPEG artifacts. If a target cannot be reached at all, the
-smallest achievable file is returned and labelled 未达标.
+smallest achievable file is returned and labelled "target missed".
 
 **Why does the image look worse after upscaling?**
 Upscaling cannot invent detail. The extra pixels are interpolated, so the result is
@@ -299,8 +303,8 @@ image. Copying an image in a browser, or taking a screenshot, works.
 That is the price of a real search: a single resolution can need about a dozen JPEG
 encodes (one feasibility probe at the quality floor, one at the ceiling, then nine
 binary-search probes), and up to six resolutions may be tried before the budget is
-met. A 12-megapixel source is a lot of pixels to encode repeatedly. The 处理耗时 row
-shows the actual time, and the interface stays responsive — a "处理中" indicator
+met. A 12-megapixel source is a lot of pixels to encode repeatedly. The Processing time row
+shows the actual time, and the interface stays responsive — a "Working" indicator
 appears over the preview while it works. Starting from a smaller source, or picking
 a lower output resolution, is the fastest fix.
 
@@ -331,9 +335,9 @@ over the target. The warning itself suggests the fix — switch to JPG for the s
 pick a lower output size (see "Read the pre-export panel").
 
 **I cannot see what is being cropped away.**
-That is what the 成片 view shows by default: only the result. Switch the preview to
-**原图取景** and you get the whole source with the crop box on top, everything outside
-dimmed, and the box draggable. Picking the 取景 step in the left rail switches to it
+That is what the Result view shows by default: only the result. Switch the preview to
+**Framing** and you get the whole source with the crop box on top, everything outside
+dimmed, and the box draggable. Picking the Framing step in the left rail switches to it
 automatically.
 
 ## 12. Browser notes
@@ -357,7 +361,7 @@ budget on every browser.
 - `Enter` applies custom ratio and target-size values.
 - Preset cards respond to `Enter` / `Space` (ratio only — use the card's Apply button
   for ratio plus recommended pixels); the focus grid is a group of labelled buttons.
-- The preview view switch, **三分线** and **重置居中** controls are in the preview header.
+- The preview view switch, **Thirds** and **Re-centre** controls are in the preview header.
 - `Esc` cancels a drag in progress and dismisses the drag overlay.
 - Toasts are announced politely; a skip link jumps to the settings column.
 - `prefers-reduced-motion` disables the animations.

@@ -15,6 +15,9 @@ Canvas，不装任何东西、不联任何网。
 **在线直接用：<https://zyphraxns.github.io/cover-forge/>** —— 或者克隆仓库后打开 `index.html`。
 放在网上也完全一样：即便是网页版，图片处理依然只在你本机完成。
 
+**界面语言：** 中文 / English 双语。点顶栏的 **EN** 按钮即可切换，选择会记在本机
+（只写一个 `localStorage` 键，不存任何其他数据）。
+
 打开 `index.html`，安装就结束了。
 
 ---

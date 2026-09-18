@@ -31,14 +31,36 @@ Two related invariants:
 
 ## Interface language
 
-The interface is currently **Simplified Chinese only**, and it is written as a
-product for people making covers: plain, specific, and honest about trade-offs.
-New user-facing strings should be Chinese and should match that tone — no
-marketing filler, and never a claim the code cannot back up.
+The interface is **bilingual: Simplified Chinese (default) and English**. All
+user-facing strings live in `i18n.js` under `STRINGS['zh-CN']` and `STRINGS['en']`;
+`zh-CN` is the default and the Chinese text inline in `index.html` is the fallback
+shown before scripts run.
 
-Internationalising the interface is welcome, but it must not introduce a
-dependency, a build step or a network request. A local string map in `app.js` is
-acceptable; a translation framework is not.
+Three rules keep this maintainable:
+
+1. **The `zh-CN` value must match the inline text in `index.html` exactly.** The
+   dictionary is the single source of truth for wording; the HTML copy exists only
+   as a no-JavaScript fallback. `tests/check-dict.mjs` enforces this.
+2. **The English UI must contain no Chinese.** `tests/check-cjk.mjs` walks every
+   text node and the common ARIA attributes after switching to English.
+3. Tone over flourish. Plain, specific, and honest about trade-offs — no marketing
+   filler, and never a claim the code cannot back up. Same rule in both languages.
+
+When you add or change a user-facing string:
+
+- add the key to **both** tables in `i18n.js`;
+- if it is static HTML, also add a `{ sel, key }` entry to the `DOM` map in
+  `i18n.js` (or let the JS that already writes that node handle it);
+- strings that are built at runtime must go through `tr(...)`, **not** a literal —
+  and never name that helper `t`, which collides with locals such as
+  `const t = S.targetBytes` in `paintStatus`.
+
+```bash
+cd tests
+node check-cjk.mjs    # English UI must be free of Chinese
+node check-dict.mjs   # zh dictionary must match the inline HTML
+node check-lang.mjs   # full pass in English: render, compress, download, persist
+```
 
 ---
 
@@ -102,10 +124,19 @@ It writes its fixtures and downloads into `tests/output-verify/`, a separate roo
 `qa.mjs`'s `tests/output/`, so the two suites can be run in either order without either
 run destroying the other's artifacts. Both roots are gitignored.
 
+Three smaller checks guard the bilingual interface (see **Interface language** above):
+
+```bash
+cd tests
+node check-cjk.mjs    # the English UI must contain no Chinese
+node check-dict.mjs   # the zh dictionary must match the text inline in index.html
+node check-lang.mjs   # a full pass in English: upload, crop, compress, download
+```
+
 **Behaviour changes need test coverage.** Please add or update cases in
 `tests/qa.mjs`. Two things are worth knowing about the suite:
 
-- It is organised into numbered groups (`1 · 上传路径` … `11 · 离线性与稳定性`) with
+- It is organised into numbered groups (`1 · 上传路径` "Upload paths" … `11 · 离线性与稳定性` "Privacy & stability" — the group labels inside `qa.mjs` are in Chinese) with
   stable case IDs (`3.2`, `5.1`, …). Add cases inside the matching group, and use a
   new ID rather than renumbering existing ones.
 - Case `11.1` asserts that **zero** non-`file://` requests occur during a full
@@ -121,10 +152,10 @@ Presets are data, in `PLATFORM_GROUPS` in `app.js`:
 
 ```js
 {
-  name: '视频横版',                       // group heading, rendered in order
+  name: tr('group.landscape'),            // group heading, rendered in order — keys live in i18n.js
   items: [
     { id: 'bilibili',                     // unique, stable; used for selection state
-      name: 'Bilibili 视频封面',           // shown on the card
+      name: tr('preset.bilibili'),        // shown on the card — keys live in i18n.js
       w: 16, h: 9,                        // aspect ratio (decimals allowed)
       pw: 1920, ph: 1080 }                // recommended output pixels
   ]
@@ -142,7 +173,7 @@ Checklist for a new preset:
    file should not propagate stale numbers.
 5. Add the preset to the tables in `README.md`, `README.zh-CN.md`, `USAGE.md` and
    `USAGE.zh-CN.md`.
-6. Add a case to group `2 · 比例裁剪` asserting the output ratio accuracy.
+6. Add a case to group `2 · 比例裁剪` ("Aspect ratio") asserting the output ratio accuracy.
 
 ### Adding a target-size preset
 
@@ -150,7 +181,7 @@ Presets live in `SIZE_CHIPS` in `app.js`:
 
 ```js
 { label: '500 KB', bytes: 500 * 1024 }   // label is display text, bytes is the value
-{ label: '不限',   bytes: null }          // null means unlimited
+{ label: tr('size.unlimited'), bytes: null }   // null means unlimited — keys live in i18n.js
 ```
 
 Keep no more than a handful of chips — the panel must stay scannable, and arbitrary
@@ -162,13 +193,13 @@ values are already covered by the custom input. A tighter warning threshold than
 - Every state change must go through `invalidate()` so the serialized render
   pipeline and its job token can guard against stale paints. Do not call
   `render()` directly from an event handler.
-- Keep the "prediction is the file" guarantee: the number shown in 导出前信息 must
+- Keep the "prediction is the file" guarantee: the number shown in **Before you export** must
   keep coming from the byte length of the blob that will be downloaded. Never
   introduce a separate estimate.
 - Anything the user might be surprised by must be stated in the interface, not
   hidden: upscaling factors, resolution reduction, PNG's uncontrollable size,
-  unreachable targets. See the flags in section `03 · 目标文件大小` and
-  `04 · 输出尺寸` for the existing pattern.
+  unreachable targets. See the flags in section `03 · 目标文件大小` ("Target file size") and
+  `04 · 输出尺寸` ("Output size") for the existing pattern.
 - Respect `[hidden]`: `styles.css` relies on a global `[hidden] { display: none
   !important }` rule to make the attribute reliable against `display: flex/grid`.
   Do not fight it per-component.
@@ -209,7 +240,7 @@ A useful report includes:
    paths.)
 3. The exact output settings: ratio, output-size strategy, target size, format.
 4. Expected result vs. actual result.
-5. A screenshot of the 导出前信息 panel, which contains most of the diagnostic data.
+5. A screenshot of the **Before you export** panel, which contains most of the diagnostic data.
 6. Any console errors (open DevTools → Console).
 
 If the issue is about a file size that does not match the panel, please include both
@@ -234,6 +265,9 @@ predicted.
 - [ ] The console is clean (no errors, no warnings).
 - [ ] No new network request of any kind.
 - [ ] Both languages of any affected doc were updated (`README*`, `USAGE*`).
+- [ ] If you touched a user-facing string: `node check-cjk.mjs`, `node check-dict.mjs`
+      and `node check-lang.mjs` all pass, and the string exists in **both** tables of
+      `i18n.js`.
 - [ ] No new dependency, build step or CDN link.
 - [ ] Keyboard operation and focus visibility still work.
 - [ ] The narrow layout was checked.

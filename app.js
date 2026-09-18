@@ -21,6 +21,8 @@
 (function () {
   'use strict';
 
+  var tr = (window.CF && window.CF.tr) || function (k) { return k; };
+
   /* ── 1. 工具函数 ────────────────────────────────────────────────────── */
 
   const D = Object.create(null);
@@ -118,48 +120,54 @@
 
   const GENERIC_RATIOS = [[16, 9], [9, 16], [1, 1], [3, 4], [4, 3], [4, 5], [5, 4], [2, 3], [3, 2], [21, 9]];
 
-  const PLATFORM_GROUPS = [
-    {
-      name: '视频横版',
-      items: [
-        { id: 'bilibili', name: 'Bilibili 视频封面', w: 16, h: 9, pw: 1920, ph: 1080 },
-        { id: 'youtube', name: 'YouTube 缩略图', w: 16, h: 9, pw: 1280, ph: 720 }
-      ]
-    },
-    {
-      name: '视频竖版',
-      items: [
-        { id: 'douyin', name: '抖音 / 快手 / 视频号', w: 9, h: 16, pw: 1080, ph: 1920 }
-      ]
-    },
-    {
-      name: '图文社交',
-      items: [
-        { id: 'xiaohongshu', name: '小红书封面', w: 3, h: 4, pw: 1080, ph: 1440 },
-        { id: 'instagram', name: 'Instagram 帖子', w: 4, h: 5, pw: 1080, ph: 1350 }
-      ]
-    },
-    {
-      name: '方图 / 头像',
-      items: [
-        { id: 'square', name: '方图 / 头像', w: 1, h: 1, pw: 1080, ph: 1080 }
-      ]
-    },
-    {
-      name: '文章头图',
-      items: [
-        { id: 'wechat', name: '公众号头图', w: 2.35, h: 1, pw: 1175, ph: 500 }
-      ]
-    }
-  ];
+  // 注意：这两组是「函数」而不是常量 —— 文案要在构建时求值，
+  // 否则切换语言后预设名 / 「不限」标签仍停留在加载时的语言。
+  function platformGroups() {
+    return [
+      {
+        name: tr('group.landscape'),
+        items: [
+          { id: 'bilibili', name: tr('preset.bilibili'), w: 16, h: 9, pw: 1920, ph: 1080 },
+          { id: 'youtube', name: tr('preset.youtube'), w: 16, h: 9, pw: 1280, ph: 720 }
+        ]
+      },
+      {
+        name: tr('group.vertical'),
+        items: [
+          { id: 'douyin', name: tr('preset.douyin'), w: 9, h: 16, pw: 1080, ph: 1920 }
+        ]
+      },
+      {
+        name: tr('group.social'),
+        items: [
+          { id: 'xiaohongshu', name: tr('preset.xiaohongshu'), w: 3, h: 4, pw: 1080, ph: 1440 },
+          { id: 'instagram', name: tr('preset.instagram'), w: 4, h: 5, pw: 1080, ph: 1350 }
+        ]
+      },
+      {
+        name: tr('group.square'),
+        items: [
+          { id: 'square', name: tr('preset.square'), w: 1, h: 1, pw: 1080, ph: 1080 }
+        ]
+      },
+      {
+        name: tr('group.article'),
+        items: [
+          { id: 'wechat', name: tr('preset.wechat'), w: 2.35, h: 1, pw: 1175, ph: 500 }
+        ]
+      }
+    ];
+  }
 
-  const SIZE_CHIPS = [
-    { label: '不限', bytes: null },
-    { label: '200 KB', bytes: 200 * 1024 },
-    { label: '500 KB', bytes: 500 * 1024 },
-    { label: '1 MB', bytes: 1024 * 1024 },
-    { label: '2 MB', bytes: 2 * 1024 * 1024 }
-  ];
+  function sizeChips() {
+    return [
+      { label: tr('size.unlimited'), bytes: null },
+      { label: '200 KB', bytes: 200 * 1024 },
+      { label: '500 KB', bytes: 500 * 1024 },
+      { label: '1 MB', bytes: 1024 * 1024 },
+      { label: '2 MB', bytes: 2 * 1024 * 1024 }
+    ];
+  }
 
   const MAX_TARGET_BYTES = 50 * 1024 * 1024;
   const TINY_TARGET_BYTES = 50 * 1024;
@@ -320,7 +328,7 @@
     for (let iter = 0; iter < MAX_SCALE_ITER; iter++) {
       const canvas = scale === 1 ? baseCanvas : scaleCanvas(baseCanvas, scale);
 
-      setBusyText('正在压缩到目标体积…');
+      setBusyText(tr('busy.compress'));
       const floor = await toBlobAsync(canvas, 'image/jpeg', Q_MIN);
       smallest = { blob: floor, quality: Q_MIN, canvas: canvas, scale: scale };
 
@@ -363,17 +371,17 @@
   /** 完整编码：产出唯一一份 blob —— 它既是“预估大小”，也是下载内容。 */
   async function encodeOutput(baseCanvas, geo) {
     if (S.format === 'image/png') {
-      setBusyText('正在编码 PNG…');
+      setBusyText(tr('busy.png'));
       const blob = await toBlobAsync(baseCanvas, 'image/png');
       return { blob: blob, quality: null, canvas: baseCanvas, scale: 1, minBytes: blob.size };
     }
     if (S.manualQuality > 0) {
-      setBusyText('正在按指定质量编码…');
+      setBusyText(tr('busy.manual'));
       const blob = await toBlobAsync(baseCanvas, 'image/jpeg', S.manualQuality);
       return { blob: blob, quality: S.manualQuality, canvas: baseCanvas, scale: 1, minBytes: blob.size };
     }
     if (S.targetBytes === null) {
-      setBusyText('正在编码 JPG…');
+      setBusyText(tr('busy.jpg'));
       const blob = await toBlobAsync(baseCanvas, 'image/jpeg', Q_UNLIMITED);
       return { blob: blob, quality: Q_UNLIMITED, canvas: baseCanvas, scale: 1, minBytes: blob.size };
     }
@@ -396,7 +404,7 @@
     setBusyText(text);
     const pill = $('ro-status');
     pill.dataset.state = 'busy';
-    pill.textContent = '处理中';
+    pill.textContent = tr('status.busy');
   }
 
   function popBusy() {
@@ -411,7 +419,7 @@
   async function render() {
     if (!S.img) { clearOutputs(); return false; }
     const my = ++jobSeq;
-    pushBusy('正在裁切画面…');
+    pushBusy(tr('busy.crop'));
     await nextPaint();
     try {
       const t0 = performance.now();
@@ -420,7 +428,7 @@
       S.geo = geo;
       paintGeometry(geo);
 
-      setBusyText('正在重采样…');
+      setBusyText(tr('busy.resample'));
       const crop = buildCropCanvas(geo);
       const bgFill = S.format === 'image/jpeg' ? S.bgColor : null;
       const master = resample(crop, geo.outW, geo.outH, bgFill);
@@ -452,7 +460,8 @@
       return true;
     } catch (err) {
       if (my === jobSeq) {
-        toast('error', '处理失败', '浏览器无法完成本次编码：' + (err && err.message ? err.message : String(err)) + '。请换一张图片或降低目标尺寸后重试。');
+        toast('error', tr('toast.encodeFail.title'),
+          tr('toast.encodeFail.msg', { err: (err && err.message ? err.message : String(err)) }));
       }
       return false;
     } finally {
@@ -664,7 +673,7 @@
     const close = document.createElement('button');
     close.type = 'button';
     close.className = 'toast__close';
-    close.setAttribute('aria-label', '关闭提示');
+    close.setAttribute('aria-label', tr('toast.close'));
     close.textContent = '\u00d7';
 
     node.appendChild(body); node.appendChild(close);
@@ -691,6 +700,11 @@
   const sizeChipEls = [];
 
   function buildUI() {
+    // 切换语言时会重新调用本函数：先清空缓存，避免数组重复累加
+    ratioChipEls.length = 0;
+    presetCardEls.length = 0;
+    sizeChipEls.length = 0;
+
     // 通用比例
     const box = $('generic-ratios');
     box.textContent = '';
@@ -701,7 +715,7 @@
       b.dataset.rw = String(w);
       b.dataset.rh = String(h);
       b.textContent = trimNum(w, 2) + ':' + trimNum(h, 2);
-      b.setAttribute('aria-label', '画面比例 ' + trimNum(w, 2) + ' 比 ' + trimNum(h, 2));
+      b.setAttribute('aria-label', tr('chip.aria', { w: trimNum(w, 2), h: trimNum(h, 2) }));
       b.addEventListener('click', () => applyRatio(w, h, null));
       box.appendChild(b);
       ratioChipEls.push(b);
@@ -710,7 +724,7 @@
     // 平台预设
     const ps = $('platform-presets');
     ps.textContent = '';
-    PLATFORM_GROUPS.forEach((g) => {
+    platformGroups().forEach((g) => {
       const wrap = document.createElement('div');
       wrap.className = 'preset-group';
       const nm = document.createElement('p');
@@ -728,7 +742,7 @@
         card.setAttribute('role', 'button');
         card.tabIndex = 0;
         card.setAttribute('aria-pressed', 'false');
-        card.setAttribute('aria-label', it.name + ' · 比例 ' + trimNum(it.w, 2) + ':' + trimNum(it.h, 2) + ' · 推荐 ' + it.pw + ' × ' + it.ph);
+        card.setAttribute('aria-label', tr('preset.aria', { name: it.name, r: trimNum(it.w, 2) + ':' + trimNum(it.h, 2), w: it.pw, h: it.ph }));
 
         const bodyEl = document.createElement('span');
         bodyEl.className = 'preset__body';
@@ -743,8 +757,8 @@
         const applyBtn = document.createElement('button');
         applyBtn.type = 'button';
         applyBtn.className = 'preset__apply';
-        applyBtn.textContent = '套用';
-        applyBtn.setAttribute('aria-label', '套用 ' + it.name + ' 比例与推荐尺寸');
+        applyBtn.textContent = tr('btn.apply');
+        applyBtn.setAttribute('aria-label', tr('btn.apply.aria', { name: it.name }));
 
         card.appendChild(bodyEl); card.appendChild(applyBtn);
         items.appendChild(card);
@@ -762,7 +776,7 @@
     // 目标体积预设
     const sp = $('size-presets');
     sp.textContent = '';
-    SIZE_CHIPS.forEach((c) => {
+    sizeChips().forEach((c) => {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'chip';
@@ -773,31 +787,24 @@
       sizeChipEls.push({ el: b, data: c });
     });
 
-    // 长边快捷值
-    $('edge-presets').addEventListener('click', (e) => {
-      const b = e.target.closest('.chip[data-edge]');
-      if (!b) return;
-      $('edge-input').value = b.dataset.edge;
-      setEdge(Number(b.dataset.edge));
-    });
   }
 
   /* ── 10. 状态写回 UI ────────────────────────────────────────────────── */
 
   function paintStatus() {
     const pill = $('ro-status');
-    if (!S.img) { pill.dataset.state = 'idle'; pill.textContent = '待载入'; return; }
-    if (busyDepth > 0) { pill.dataset.state = 'busy'; pill.textContent = '处理中'; return; }
-    if (!S.result) { pill.dataset.state = 'idle'; pill.textContent = '待处理'; return; }
+    if (!S.img) { pill.dataset.state = 'idle'; pill.textContent = tr('status.idle'); return; }
+    if (busyDepth > 0) { pill.dataset.state = 'busy'; pill.textContent = tr('status.busy'); return; }
+    if (!S.result) { pill.dataset.state = 'idle'; pill.textContent = tr('status.wait'); return; }
     const t = S.targetBytes;
-    if (t === null) { pill.dataset.state = 'ok'; pill.textContent = '已就绪'; return; }
-    if (S.result.blob.size <= t) { pill.dataset.state = 'ok'; pill.textContent = '目标达成'; }
-    else { pill.dataset.state = 'warn'; pill.textContent = '未达标'; }
+    if (t === null) { pill.dataset.state = 'ok'; pill.textContent = tr('status.ready'); return; }
+    if (S.result.blob.size <= t) { pill.dataset.state = 'ok'; pill.textContent = tr('status.hit'); }
+    else { pill.dataset.state = 'warn'; pill.textContent = tr('status.miss'); }
   }
 
   function focusText() {
-    if (Math.abs(S.focusX - 0.5) < 0.006 && Math.abs(S.focusY - 0.5) < 0.006) return '居中 · 50% / 50%';
-    return '焦点 ' + Math.round(S.focusX * 100) + '% / ' + Math.round(S.focusY * 100) + '%';
+    if (Math.abs(S.focusX - 0.5) < 0.006 && Math.abs(S.focusY - 0.5) < 0.006) return tr('focus.center');
+    return tr('focus.at', { x: Math.round(S.focusX * 100), y: Math.round(S.focusY * 100) });
   }
 
   function paintFocus() {
@@ -824,8 +831,8 @@
     frame.classList.toggle('is-locked', !slack);
     $('stage-hint').hidden = !slack;
     $('stage-hint-text').textContent = isSource
-      ? '拖动裁剪框，决定保留原图的哪一块'
-      : '在框内拖动可调整取景焦点';
+      ? tr('hint.source')
+      : tr('hint.crop');
 
     paintCropReadout(geo);
 
@@ -835,13 +842,13 @@
     const up = $('flag-upscale');
     if (geo.factor > 1.001) {
       up.hidden = false;
-      up.textContent = '将放大 ' + geo.factor.toFixed(2) + '×（原始像素不足，多出的细节由插值生成，画质可能下降）';
+      up.textContent = tr('flag.upscale', { n: geo.factor.toFixed(2) });
     } else { up.hidden = true; }
 
     const down = $('flag-downscale');
     if (geo.factor < 0.999 && S.sizeMode !== 'max') {
       down.hidden = false;
-      down.textContent = '已按你指定的输出尺寸缩小到原图可用分辨率的 ' + (geo.factor * 100).toFixed(0) + '%。';
+      down.textContent = tr('flag.downscale', { p: (geo.factor * 100).toFixed(0) });
     } else { down.hidden = true; }
 
     // 输出尺寸策略
@@ -865,8 +872,8 @@
     $('bg-field').hidden = !(S.format === 'image/jpeg' && S.hasAlpha);
     $('quality-field').hidden = S.format === 'image/png';
     $('format-hint').textContent = S.format === 'image/png'
-      ? 'PNG 无损、保留透明通道，但体积不可控（无法用质量参数压缩）。'
-      : 'JPG 体积小、适合照片；透明区域会按所选背景色填充。';
+      ? tr('fmt.hint.png')
+      : tr('fmt.hint.jpg');
 
     $('stage-thirds').hidden = !S.thirdsVisible;
     $('btn-toggle-grid').setAttribute('aria-pressed', S.thirdsVisible ? 'true' : 'false');
@@ -879,9 +886,9 @@
   /** 裁切区域的数值读数（拖动时要实时刷新） */
   function paintCropReadout(geo) {
     $('crop-info').hidden = false;
-    $('crop-rect').textContent = geo.cropW + ' × ' + geo.cropH + ' @ (' + geo.sx + ', ' + geo.sy + ')';
-    $('crop-gap-x').textContent = geo.gapX + ' px';
-    $('crop-gap-y').textContent = geo.gapY + ' px';
+    $('crop-rect').textContent = tr('crop.rect', { w: geo.cropW, h: geo.cropH, x: geo.sx, y: geo.sy });
+    $('crop-gap-x').textContent = tr('crop.gap', { n: geo.gapX });
+    $('crop-gap-y').textContent = tr('crop.gap', { n: geo.gapY });
   }
 
   function paintViewToggle() {
@@ -934,7 +941,7 @@
     $('mode-preset').disabled = !S.presetPx;
     $('mode-preset-px').textContent = S.presetPx ? (S.presetPx.w + ' × ' + S.presetPx.h) : '—';
     $('edge-field').hidden = S.sizeMode !== 'edge';
-    $('quality-readout').textContent = S.manualQuality > 0 ? Math.round(S.manualQuality * 100) + '%' : '自动';
+    $('quality-readout').textContent = S.manualQuality > 0 ? Math.round(S.manualQuality * 100) + '%' : tr('q.auto');
     $('quality-input').value = String(Math.round(S.manualQuality * 100));
   }
 
@@ -944,7 +951,7 @@
     if (!r) return;
     const bytes = r.blob.size;
     const target = S.targetBytes;
-    const dimsText = r.w + ' × ' + r.h + ' px';
+    const dimsText = tr('dims.px', { w: r.w, h: r.h });
 
     $('sm-dims').textContent = dimsText;
     $('ro-dims').textContent = r.w + ' × ' + r.h;
@@ -955,23 +962,24 @@
 
     const ext = S.format === 'image/png' ? 'PNG' : 'JPG';
     $('sm-format').textContent = ext;
-    $('sm-target').textContent = target === null ? '不限（最高画质）' : fmtBytes(target);
-    $('ro-target').textContent = target === null ? '不限' : fmtBytes(target);
+    $('sm-target').textContent = target === null ? tr('sm.target.unlimited') : fmtBytes(target);
+    $('ro-target').textContent = target === null ? tr('size.unlimited') : fmtBytes(target);
     $('sm-actual').textContent = fmtBytes(bytes);
     $('ro-size').textContent = fmtBytes(bytes);
 
-    if (S.format === 'image/png') $('sm-quality').textContent = '无损（PNG）';
-    else if (S.manualQuality > 0) $('sm-quality').textContent = Math.round(S.manualQuality * 100) + '%（手动指定）';
+    if (S.format === 'image/png') $('sm-quality').textContent = tr('sm.quality.lossless');
+    else if (S.manualQuality > 0) $('sm-quality').textContent = tr('sm.quality.manual', { q: Math.round(S.manualQuality * 100) });
     else if (r.quality !== null) {
-      $('sm-quality').textContent = (r.quality * 100).toFixed(0) + '%（'
-        + (target === null ? '固定高画质' : '自动匹配体积') + '）';
+      $('sm-quality').textContent = target === null
+        ? tr('sm.quality.fixed', { q: (r.quality * 100).toFixed(0) })
+        : tr('sm.quality.auto', { q: (r.quality * 100).toFixed(0) });
     } else $('sm-quality').textContent = '—';
 
     let scaleText;
-    if (geo.factor > 1.001) scaleText = '放大 ' + geo.factor.toFixed(2) + '×';
-    else if (geo.factor < 0.999) scaleText = '缩小 ' + geo.factor.toFixed(2) + '×';
-    else scaleText = '原始分辨率';
-    if (r.w !== geo.outW || r.h !== geo.outH) scaleText += ' → 体积优化再降至 ' + r.w + ' × ' + r.h;
+    if (geo.factor > 1.001) scaleText = tr('sm.scale.up', { n: geo.factor.toFixed(2) });
+    else if (geo.factor < 0.999) scaleText = tr('sm.scale.down', { n: geo.factor.toFixed(2) });
+    else scaleText = tr('sm.scale.same');
+    if (r.w !== geo.outW || r.h !== geo.outH) scaleText += tr('sm.scale.shrunk', { s: '', w: r.w, h: r.h }).replace('{s}', scaleText).replace(/^.*?→/, ' →');
     $('sm-scale').textContent = scaleText;
 
     $('sm-time').textContent = (ms / 1000).toFixed(1) + ' s';
@@ -980,43 +988,43 @@
     let verdictHtml, reached;
     if (target === null) {
       reached = true;
-      verdictHtml = '<span class="verdict verdict--idle">未设置目标 · 使用最高画质</span>';
+      verdictHtml = '<span class="verdict verdict--idle">' + tr('sm.verdict.none') + '</span>';
     } else if (bytes <= target) {
       reached = true;
       const room = (bytes / target * 100).toFixed(1);
-      verdictHtml = '<span class="verdict verdict--ok">\u2705 达标 · 用掉目标的 ' + room + '%</span>';
+      verdictHtml = '<span class="verdict verdict--ok">' + tr('sm.verdict.ok', { p: room }) + '</span>';
     } else {
       reached = false;
-      verdictHtml = '<span class="verdict verdict--warn">\u26a0 未达标 · 超出 ' + fmtBytes(bytes - target) + '</span>';
+      verdictHtml = '<span class="verdict verdict--warn">' + tr('sm.verdict.miss', { d: fmtBytes(bytes - target) }) + '</span>';
     }
     $('sm-verdict').innerHTML = verdictHtml;
 
     // 脚注（诚实说明）
     const notes = [];
     if (S.format === 'image/jpeg' && S.hasAlpha) {
-      notes.push('原图含透明通道，透明区域已填充背景色 ' + S.bgColor.toUpperCase() + '。');
+      notes.push(tr('note.bgfill', { color: S.bgColor.toUpperCase() }));
     }
     if (S.format === 'image/png' && target !== null && !reached) {
-      notes.push('PNG 为无损格式，无法用质量参数控制体积，当前超出目标 ' + fmtBytes(bytes - target) + '。点上方「改为 JPG」即可达标。');
+      notes.push(tr('note.pngOver', { d: fmtBytes(bytes - target) }));
     }
     if (r.unreachable) {
-      notes.push('该目标过小，已压到当前可达的最小体积 ' + fmtBytes(r.minBytes) + '。');
+      notes.push(tr('note.unreachable', { size: fmtBytes(r.minBytes) }));
     }
     if (geo.factor > 1.001 && S.sizeMode !== 'max') {
-      notes.push('输出由裁切区 ' + geo.cropW + ' × ' + geo.cropH + ' 放大 ' + geo.factor.toFixed(2) + ' 倍生成，非原始像素。');
+      notes.push(tr('note.upscaled', { cw: geo.cropW, ch: geo.cropH, n: geo.factor.toFixed(2) }));
     }
     if (r.w !== geo.outW || r.h !== geo.outH) {
-      notes.push('为贴近目标体积，分辨率已由 ' + geo.outW + ' × ' + geo.outH + ' 优化到 ' + r.w + ' × ' + r.h + '。');
+      notes.push(tr('note.shrunk', { ow: geo.outW, oh: geo.outH, w: r.w, h: r.h }));
     }
-    if (!notes.length) notes.push('全部处理在本机浏览器完成，图片不会离开这台设备。');
+    if (!notes.length) notes.push(tr('note.privacy'));
     $('sm-foot').textContent = notes.join(' ');
 
     // 下载按钮
     $('btn-download').disabled = false;
-    $('download-label').textContent = '下载 ' + ext + ' · ' + r.w + ' × ' + r.h;
+    $('download-label').textContent = tr('dl.label', { ext: ext, w: r.w, h: r.h });
     $('download-note').textContent = target === null
-      ? ext + ' · ' + fmtBytes(bytes) + ' · 未限制体积'
-      : ext + ' · ' + fmtBytes(bytes) + ' · 目标 ' + fmtBytes(target) + (reached ? ' · 达标' : ' · 未达标');
+      ? tr('dl.note.unlimited', { ext: ext, size: fmtBytes(bytes) })
+      : tr('dl.note.target', { ext: ext, size: fmtBytes(bytes), target: fmtBytes(target), state: reached ? tr('dl.state.hit') : tr('dl.state.miss') });
 
     paintStatus();
   }
@@ -1059,13 +1067,13 @@
     $('sm-scale').textContent = '—';
     $('sm-time').textContent = '—';
     $('sm-verdict').textContent = '—';
-    $('sm-foot').textContent = '载入一张图片后，这里会列出导出前的全部参数。';
+    $('sm-foot').textContent = tr('sm.foot.empty');
     $('ro-dims').textContent = '—';
     $('ro-ratio').textContent = '—';
     $('ro-size').textContent = '—';
-    $('ro-target').textContent = S.targetBytes === null ? '不限' : fmtBytes(S.targetBytes);
-    $('download-label').textContent = '下载封面';
-    $('download-note').textContent = '先载入一张图片';
+    $('ro-target').textContent = S.targetBytes === null ? tr('size.unlimited') : fmtBytes(S.targetBytes);
+    $('download-label').textContent = tr('dl.label.idle');
+    $('download-note').textContent = tr('dl.note.idle');
     paintStatus();
     paintSteps();
   }
@@ -1101,13 +1109,13 @@
     const err = $('ratio-error');
     const input = $('ratio-w');
     if (!isFinite(w) || !isFinite(h) || w <= 0 || h <= 0) {
-      err.textContent = '比例的两个数值都必须大于 0，例如 2.35 : 1。';
+      err.textContent = tr('ratio.err.positive');
       err.hidden = false;
       input.setAttribute('aria-invalid', 'true');
       return Promise.resolve(false);
     }
     if (w > 100 || h > 100) {
-      err.textContent = '单个数值请控制在 0 – 100 之间。';
+      err.textContent = tr('ratio.err.range');
       err.hidden = false;
       input.setAttribute('aria-invalid', 'true');
       return Promise.resolve(false);
@@ -1147,7 +1155,7 @@
     }
     const num = Number(raw);
     if (!isFinite(num) || num <= 0) {
-      err.textContent = '请输入大于 0 的数值。';
+      err.textContent = tr('size.err.positive');
       err.hidden = false;
       input.setAttribute('aria-invalid', 'true');
       return Promise.resolve(false);
@@ -1155,7 +1163,7 @@
     const bytes = sizeUnit === 'MB' ? num * 1024 * 1024 : num * 1024;
     if (bytes > MAX_TARGET_BYTES) {
       const mb = trimNum(sizeUnit === 'MB' ? num : num / 1024, 2);
-      err.textContent = '目标不能超过 50 MB（当前 ' + mb + ' MB）。';
+      err.textContent = tr('size.err.max', { mb: mb });
       err.hidden = false;
       input.setAttribute('aria-invalid', 'true');
       return Promise.resolve(false);
@@ -1171,7 +1179,7 @@
     const err = $('edge-error');
     const input = $('edge-input');
     if (!isFinite(v) || v < 16 || v > 10000) {
-      err.textContent = '长边像素需在 16 – 10000 之间。';
+      err.textContent = tr('edge.err');
       err.hidden = false;
       input.setAttribute('aria-invalid', 'true');
       return;
@@ -1226,14 +1234,14 @@
   async function loadFile(file) {
     if (!file) return;
     if (!isImageFile(file)) {
-      toast('error', '无法载入这张素材',
-        '「' + file.name + '」不是支持的图片格式。请使用 JPG / PNG / WebP / GIF / BMP 图片。');
+      toast('error', tr('toast.notImage.title'),
+        tr('toast.notImage.msg', { name: file.name }));
       return;
     }
-    pushBusy('正在读取图片…');
+    pushBusy(tr('busy.read'));
     try {
       const url = await readAsDataURL(file);
-      setBusyText('正在解码像素…');
+      setBusyText(tr('busy.decode'));
       const img = await decodeImage(url);
 
       S.file = file;
@@ -1247,12 +1255,12 @@
 
       $('info-name').textContent = file.name;
       $('info-name').title = file.name;
-      $('info-dims').textContent = S.srcW + ' × ' + S.srcH + ' px';
+      $('info-dims').textContent = tr('dims.px', { w: S.srcW, h: S.srcH });
       $('info-mp').textContent = trimNum(S.srcW * S.srcH / 1e6, 2) + ' MP';
       $('info-ratio').textContent = ratioText(S.srcW, S.srcH);
       $('info-size').textContent = fmtBytes(file.size);
-      $('info-format').textContent = (file.type || '').replace('image/', '').toUpperCase() || '未知';
-      $('info-alpha').textContent = S.hasAlpha ? '有' : '无';
+      $('info-format').textContent = (file.type || '').replace('image/', '').toUpperCase() || tr('value.unknown');
+      $('info-alpha').textContent = S.hasAlpha ? tr('value.yes') : tr('value.no');
 
       $('source-info').hidden = false;
       $('flag-large').hidden = !(S.srcW * S.srcH >= LARGE_PIXELS);
@@ -1270,11 +1278,11 @@
 
       await invalidate();
 
-      toast('info', '素材已载入',
-        S.srcW + ' × ' + S.srcH + ' px · ' + fmtBytes(file.size) + ' · ' + (S.hasAlpha ? '含透明通道' : '无透明通道'));
+      toast('info', tr('toast.load.title'),
+        tr('toast.load.msg', { w: S.srcW, h: S.srcH, size: fmtBytes(file.size), alpha: S.hasAlpha ? tr('alpha.yes') : tr('alpha.no') }));
     } catch (err) {
-      toast('error', '图片解码失败',
-        '「' + file.name + '」无法被浏览器解码：文件可能已损坏，或使用了不支持的图片编码。');
+      toast('error', tr('toast.decode.title'),
+        tr('toast.decode.msg', { name: file.name }));
     } finally {
       popBusy();
     }
@@ -1307,18 +1315,20 @@
       }, 4000);
 
       const target = S.targetBytes;
-      const tail = target === null ? '未限制体积' : (r.blob.size <= target ? '已达成目标 ' + fmtBytes(target) : '超出目标 ' + fmtBytes(target));
-      toast('success', '封面已导出', name + ' · ' + fmtBytes(r.blob.size) + ' · ' + tail + ' · 耗时 ' + (r.ms / 1000).toFixed(1) + ' s');
+      const tail = target === null ? tr('tail.unlimited') : (r.blob.size <= target ? tr('tail.hit', { target: fmtBytes(target) }) : tr('tail.miss', { target: fmtBytes(target) }));
+      toast('success', tr('toast.exported.title'),
+        tr('toast.exported.msg', { name: name, size: fmtBytes(r.blob.size), tail: tail, sec: (r.ms / 1000).toFixed(1) }));
 
       if (target !== null && r.blob.size > target) {
-        toast('warn', '未达到目标体积',
-          '当前 ' + fmtBytes(r.blob.size) + '，目标 ' + fmtBytes(target) + '。' +
-          (S.format === 'image/png'
-            ? 'PNG 是无损格式，无法用质量参数压缩，可改用 JPG。'
-            : '可尝试更小的输出尺寸，或改用 PNG 保留无损画质。'));
+        toast('warn', tr('toast.miss.title'),
+        tr('toast.miss.msg', {
+          size: fmtBytes(r.blob.size), target: fmtBytes(target),
+          advice: S.format === 'image/png' ? tr('advice.png') : tr('advice.jpg')
+        }));
       }
     } catch (err) {
-      toast('error', '导出失败', '生成文件时出错：' + (err && err.message ? err.message : String(err)));
+      toast('error', tr('toast.exportFail.title'),
+        tr('toast.exportFail.msg', { err: (err && err.message ? err.message : String(err)) }));
     } finally {
       $('btn-download').disabled = false;
     }
@@ -1371,7 +1381,7 @@
     clearOutputs();
     paintSelection();
     paintFocus();
-    $('focus-readout').textContent = '居中 · 50% / 50%';
+    $('focus-readout').textContent = tr('focus.center');
   }
 
   /* ── 14. 事件绑定 ───────────────────────────────────────────────────── */
@@ -1591,8 +1601,21 @@
     $('quality-input').addEventListener('input', () => {
       const v = Number($('quality-input').value);
       S.manualQuality = v > 0 ? v / 100 : 0;
-      $('quality-readout').textContent = S.manualQuality > 0 ? Math.round(S.manualQuality * 100) + '%' : '自动';
+      $('quality-readout').textContent = S.manualQuality > 0 ? Math.round(S.manualQuality * 100) + '%' : tr('q.auto');
       invalidate(200);
+    });
+
+    // 长边快捷值
+    $('edge-presets').addEventListener('click', (e) => {
+      const b = e.target.closest('.chip[data-edge]');
+      if (!b) return;
+      $('edge-input').value = b.dataset.edge;
+      setEdge(Number(b.dataset.edge));
+    });
+
+    // 语言切换（i18n.js 提供 CF；未加载时按钮不出现副作用）
+    $('btn-lang').addEventListener('click', () => {
+      if (window.CF) window.CF.toggleLang();
     });
 
     // 下载 / 重置
@@ -1642,7 +1665,31 @@
 
   /* ── 15. 启动 ───────────────────────────────────────────────────────── */
 
+  /**
+   * 语言切换回调（由 i18n.js 的 setLang 调用）。
+   * 静态文案由 i18n.js 按选择器表覆盖；这里负责所有「构建时生成」的动态文案：
+   * 比例 chips、平台预设卡片、体积预设，以及当前这张图的全部读数。
+   */
+  window.CoverForge = window.CoverForge || {};
+  window.CoverForge.onLangChange = function () {
+    buildUI();          // chip / 预设的文字与 aria-label 都在构建时写入
+    paintSelection();
+    paintViewToggle();
+    markSwatches();
+    if (S.img) {
+      const geo = S.geo || computeGeometry();
+      paintGeometry(geo);
+      paintCropReadout(geo);
+      if (S.result) paintResult(geo, S.result.ms);
+      paintStage(geo);
+    } else {
+      clearOutputs();
+    }
+  };
+
   function boot() {
+    // 先按已保存的语言刷新静态文案（含 <title> 与 html[lang]），再构建动态部分
+    if (window.CF) window.CF.applyDOM();
     buildUI();
     bindEvents();
     markSwatches();
@@ -1655,7 +1702,7 @@
     clearOutputs();
     paintSelection();
     paintFocus();
-    $('focus-readout').textContent = '居中 · 50% / 50%';
+    $('focus-readout').textContent = tr('focus.center');
     $('btn-reset-crop').disabled = true;
   }
 

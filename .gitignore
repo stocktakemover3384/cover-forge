@@ -1,4 +1,4 @@
-# ── 系统噪声 ──────────────────────────────────────────────────────────────
+# ── OS noise ─────────────────────────────────────────────────────────────
 .DS_Store
 .DS_Store?
 ._*
@@ -7,29 +7,31 @@
 Thumbs.db
 desktop.ini
 
-# ── 编辑器 / IDE ─────────────────────────────────────────────────────────
+# ── Editors / IDEs ───────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# ── 测试产物（运行 tests/qa.mjs 与 tests/verify.mjs 后生成）──────────────
-# 注意：.gitignore 不支持行尾注释 —— 注释必须独占一行，否则整行会被当成模式。
-# 用通配一次覆盖所有产物目录：output/、output-verify/、以及临时调试目录
-# （如 output-designer-*/），避免以后每加一个目录都要回来改一次。
+# ── Test artefacts (created by tests/qa.mjs and tests/verify.mjs) ────────
+# NOTE: .gitignore does not support trailing comments — a comment must occupy
+# its own line, otherwise the whole line is treated as a pattern.
+# One wildcard covers every artefact directory: output/, output-verify/ and
+# ad-hoc debug dirs (e.g. output-designer-*/), so new ones need no edit here.
 tests/output*/
-# 按 PID 隔离的临时运行脚本与产物
+# PID-isolated temporary run scripts and artefacts
 tests/_*.mjs
 tests/.qa-iso-*.mjs
 tests/downloads/
 tests/fixtures/
 
-# 注意：tests/node_modules/ 忽略，但 tests/package.json 与
-# tests/package-lock.json 要入库 —— 让 `npm ci` 能复现出同一份 playwright-core。
+# tests/node_modules/ is ignored, but tests/package.json and
+# tests/package-lock.json ARE committed — so `npm ci` reproduces the exact
+# playwright-core build used by the test suites.
 tests/node_modules/
 
-# ── 通用 ─────────────────────────────────────────────────────────────────
+# ── Generic ──────────────────────────────────────────────────────────────
 node_modules/
 package-lock.json
 yarn.lock
@@ -39,9 +41,9 @@ npm-debug.log*
 .env
 .env.local
 
-# 测试依赖的 lockfile 需要入库（覆盖上面的通用规则）
+# The test lockfile must be committed (overrides the generic rule above)
 !tests/package-lock.json
 
-# 本地临时图片，别误提交
+# Local scratch images — do not commit by accident
 /tmp-*
 scratch/

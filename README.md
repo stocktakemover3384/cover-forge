@@ -2,7 +2,7 @@
 
 **Crop one image to any platform's cover ratio, resize it to platform pixels, and land under an exact file-size budget — entirely in your browser.**
 
-[中文说明](README.zh-CN.md) · [Usage guide](USAGE.md) · [使用说明（中文，详细）](USAGE.zh-CN.md)
+[README in Chinese](README.zh-CN.md) · [Usage guide](USAGE.md) · [Usage guide in Chinese](USAGE.zh-CN.md)
 
 CoverForge is a single-page, zero-dependency web tool for one job: turn a photo or
 screenshot into a cover that fits a specific platform. It crops to the ratio you
@@ -16,6 +16,9 @@ discover after uploading.
 
 **Try it online: <https://zyphraxns.github.io/cover-forge/>** — or clone the repo and open `index.html`.
 Hosting changes nothing: even on the web version, image processing stays on your device.
+
+**Languages:** 中文 / English. Switch with the **EN** button in the top bar; your choice is
+remembered on this device (one `localStorage` key, nothing else is stored).
 
 Open `index.html`. That is the whole installation.
 
@@ -43,10 +46,10 @@ Open `index.html`. That is the whole installation.
 - Always fills the target ratio (cover) — no distortion, no letterboxing
 - Centre-cropped by default; drag inside the preview to move the crop, or use the
   3×3 focus grid
-- Two preview views. **成片** shows the exact pixels you will download;
-  **原图取景** shows the whole source with the crop box overlaid and everything
+- Two preview views. **Result** shows the exact pixels you will download;
+  **Framing** shows the whole source with the crop box overlaid and everything
   outside it dimmed, so you can see what you are cutting away *before* you cut it
-- Picking the 取景 step in the left rail jumps straight to the source view
+- Picking the Framing step in the left rail jumps straight to the source view
 - "Reset to centre", and a rule-of-thirds overlay you can toggle — in the source
   view the thirds align to the crop box, which is where they are actually useful
 - Reports the crop rectangle and the horizontal / vertical slack in pixels
@@ -205,9 +208,9 @@ cover-forge/
 ├── app.js              all logic; classic script + IIFE
 ├── DESIGN.md           the design system (palette, type, spacing, motion)
 ├── README.md           this file
-├── README.zh-CN.md     中文说明
+├── README.zh-CN.md     Chinese README
 ├── USAGE.md            usage guide
-├── USAGE.zh-CN.md      使用说明（中文）
+├── USAGE.zh-CN.md      Usage guide (Chinese)
 ├── CONTRIBUTING.md     how to contribute
 ├── LICENSE             MIT
 └── tests/
