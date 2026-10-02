@@ -14,7 +14,7 @@ Aspect ratios, file-size budgets and page weight all have hard limits on real
 platforms. This tool treats them as first-class inputs instead of something you
 discover after uploading.
 
-**Try it online: <https://zyphraxns.github.io/cover-forge/>** — or clone the repo and open `index.html`.
+**Try it online: <https://stocktakemover3384.github.io>** — or clone the repo and open `index.html`.
 Hosting changes nothing: even on the web version, image processing stays on your device.
 
 **Languages:** 中文 / English. Switch with the **EN** button in the top bar; your choice is
